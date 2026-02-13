@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greek Master v3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap');
+        .greek-text { font-family: 'Noto Serif', serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800">
+        
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-blue-400 font-bold text-lg">Greek Master</h1>
+                <p class="text-slate-500 text-[10px] uppercase tracking-tighter">Compliance-Safe Edition</p>
+            </div>
+            <div class="text-right">
+                <span class="text-xs text-slate-400 block">SCORE</span>
+                <span id="score" class="text-2xl font-mono text-white">0</span>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <select id="typeFilter" onchange="loadCard()" class="w-full bg-slate-800 border border-slate-700 text-slate-300 py-2 px-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="all">All Words</option>
+                <option value="noun">Nouns Only</option>
+                <option value="verb">Verbs Only</option>
+            </select>
+        </div>
+
+        <div class="bg-slate-800/50 rounded-2xl p-10 mb-8 border border-slate-700/50 text-center min-h-[200px] flex flex-col justify-center">
+            <div id="word-tag" class="text-[10px] font-bold text-blue-500/80 uppercase mb-2 tracking-widest">---</div>
+            <h2 id="greek-word" class="greek-text text-5xl font-bold mb-4">...</h2>
+            <p id="definition" class="text-xl text-blue-300 font-medium hidden">...</p>
+        </div>
+
+        <div id="main-actions">
+            <button onclick="reveal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95">
+                Reveal
+            </button>
+        </div>
+
+        <div id="result-actions" class="hidden grid grid-cols-2 gap-4">
+            <button onclick="handleResult(false)" class="bg-slate-800 text-slate-400 font-bold py-4 rounded-2xl border border-slate-700">
+                Missed
+            </button>
+            <button onclick="handleResult(true)" class="bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20">
+                Got It
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const vocab = [
+            { word: "θεός", def: "God", type: "noun" },
+            { word: "λόγος", def: "Word", type: "noun" },
+            { word: "ἀγάπη", def: "Love", type: "noun" },
+            { word: "δόξα", def: "Glory", type: "noun" },
+            { word: "λέγω", def: "I say", type: "verb" },
+            { word: "βλέπω", def: "I see", type: "verb" },
+            { word: "ἔχω", def: "I have", type: "verb" },
+            { word: "γινώσκω", def: "I know", type: "verb" }
+        ];
+
+        let currentCard = {};
+        let score = parseInt(localStorage.getItem('greekScore')) || 0;
+        document.getElementById('score').innerText = score;
+
+        function loadCard() {
+            const filterValue = document.getElementById('typeFilter').value;
+            
+            // Filter the data based on selection
+            const filteredVocab = filterValue === 'all' 
+                ? vocab 
+                : vocab.filter(v => v.type === filterValue);
+
+            const randomIndex = Math.floor(Math.random() * filteredVocab.length);
+            currentCard = filteredVocab[randomIndex];
+
+            // UI Update
+            document.getElementById('greek-word').innerText = currentCard.word;
+            document.getElementById('definition').innerText = currentCard.def;
+            document.getElementById('word-tag').innerText = currentCard.type;
+            
+            document.getElementById('definition').classList.add('hidden');
+            document.getElementById('main-actions').classList.remove('hidden');
+            document.getElementById('result-actions').classList.add('hidden');
+        }
+
+        function reveal() {
+            document.getElementById('definition').classList.remove('hidden');
+            document.getElementById('main-actions').classList.add('hidden');
+            document.getElementById('result-actions').classList.remove('hidden');
+        }
+
+        function handleResult(isCorrect) {
+            if (isCorrect) {
+                score++;
+                document.getElementById('score').innerText = score;
+                localStorage.setItem('greekScore', score);
+            }
+            loadCard();
+        }
+
+        loadCard();
+    </script>
+</body>
+</html>
