@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Greek Master — Spaced Repetition</title>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -250,6 +252,9 @@ function updateStats() {
 
 init();
 </script>
-
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
 </body>
 </html>
