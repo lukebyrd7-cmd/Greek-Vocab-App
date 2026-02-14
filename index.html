@@ -1,33 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3665/3665923.png">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Greek Master">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Greek Master v3</title>
+    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3665/3665923.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Greek Master">
+
+    <title>Greek Master v4 (Connected)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap');
         .greek-text { font-family: 'Noto Serif', serif; }
+        /* A simple spinner animation */
+        .loader {
+            border: 4px solid #1e293b;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
 
-    <div class="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800">
+    <div class="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 relative">
         
         <div class="flex justify-between items-center mb-8">
             <div>
                 <h1 class="text-blue-400 font-bold text-lg">Greek Master</h1>
-                <p class="text-slate-500 text-[10px] uppercase tracking-tighter">Compliance-Safe Edition</p>
+                <p class="text-slate-500 text-[10px] uppercase tracking-tighter">Live Data Feed</p>
             </div>
             <div class="text-right">
                 <span class="text-xs text-slate-400 block">SCORE</span>
                 <span id="score" class="text-2xl font-mono text-white">0</span>
             </div>
+        </div>
+
+        <div id="loading-screen" class="absolute inset-0 bg-slate-900/90 z-10 flex flex-col items-center justify-center rounded-3xl">
+            <div class="loader mb-4"></div>
+            <p class="text-blue-400 text-sm font-bold animate-pulse">Connecting to Server...</p>
+        </div>
+
+        <div id="error-screen" class="hidden absolute inset-0 bg-slate-900 z-20 flex flex-col items-center justify-center rounded-3xl p-6 text-center">
+            <div class="text-red-500 text-5xl mb-4">⚠️</div>
+            <h3 class="text-white font-bold mb-2">Connection Failed</h3>
+            <p id="error-msg" class="text-slate-400 text-sm mb-6">Could not fetch data.</p>
+            <button onclick="initApp()" class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-lg text-sm">Retry</button>
         </div>
 
         <div class="mb-6">
@@ -51,44 +74,59 @@
         </div>
 
         <div id="result-actions" class="hidden grid grid-cols-2 gap-4">
-            <button onclick="handleResult(false)" class="bg-slate-800 text-slate-400 font-bold py-4 rounded-2xl border border-slate-700">
-                Missed
-            </button>
-            <button onclick="handleResult(true)" class="bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20">
-                Got It
-            </button>
+            <button onclick="handleResult(false)" class="bg-slate-800 text-slate-400 font-bold py-4 rounded-2xl border border-slate-700">Missed</button>
+            <button onclick="handleResult(true)" class="bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20">Got It</button>
         </div>
 
     </div>
 
     <script>
-        const vocab = [
-            { word: "θεός", def: "God", type: "noun" },
-            { word: "λόγος", def: "Word", type: "noun" },
-            { word: "ἀγάπη", def: "Love", type: "noun" },
-            { word: "δόξα", def: "Glory", type: "noun" },
-            { word: "λέγω", def: "I say", type: "verb" },
-            { word: "βλέπω", def: "I see", type: "verb" },
-            { word: "ἔχω", def: "I have", type: "verb" },
-            { word: "γινώσκω", def: "I know", type: "verb" }
-        ];
+        // *** PASTE YOUR RAW GITHUB JSON URL BELOW ***
+        const DATA_URL = https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/refs/heads/main/vocab.json;
 
+        let vocab = []; // Empty initially
         let currentCard = {};
         let score = parseInt(localStorage.getItem('greekScore')) || 0;
         document.getElementById('score').innerText = score;
 
+        // The "System of Record" Connection
+        async function initApp() {
+            // Show Loading
+            document.getElementById('loading-screen').classList.remove('hidden');
+            document.getElementById('error-screen').classList.add('hidden');
+
+            try {
+                // 1. The Fetch Request (The API Call)
+                const response = await fetch(DATA_URL);
+                
+                // 2. Error Handling (The "Bad Request" Check)
+                if (!response.ok) throw new Error(`Server Error: ${response.status}`);
+
+                // 3. Parse Data (Read the JSON)
+                vocab = await response.json();
+                
+                // 4. Success: Hide Loader and Start
+                document.getElementById('loading-screen').classList.add('hidden');
+                loadCard();
+
+            } catch (error) {
+                // 5. Failure: Show Error Screen
+                console.error("Audit Log: Fetch Failed", error);
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('error-screen').classList.remove('hidden');
+                document.getElementById('error-msg').innerText = error.message;
+            }
+        }
+
         function loadCard() {
             const filterValue = document.getElementById('typeFilter').value;
-            
-            // Filter the data based on selection
-            const filteredVocab = filterValue === 'all' 
-                ? vocab 
-                : vocab.filter(v => v.type === filterValue);
+            const filteredVocab = filterValue === 'all' ? vocab : vocab.filter(v => v.type === filterValue);
+
+            if (filteredVocab.length === 0) return; // Safety check
 
             const randomIndex = Math.floor(Math.random() * filteredVocab.length);
             currentCard = filteredVocab[randomIndex];
 
-            // UI Update
             document.getElementById('greek-word').innerText = currentCard.word;
             document.getElementById('definition').innerText = currentCard.def;
             document.getElementById('word-tag').innerText = currentCard.type;
@@ -113,7 +151,8 @@
             loadCard();
         }
 
-        loadCard();
+        // Start the engine
+        initApp();
     </script>
 </body>
 </html>
