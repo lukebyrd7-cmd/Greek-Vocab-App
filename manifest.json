@@ -1,8 +1,7 @@
 {
-  "name": "Greek Master",
-  "short_name": "Greek Master",
-  "description": "Spaced repetition trainer for Greek vocabulary",
-  "start_url": ".",
+ "name": "The Puritan Parser",
+"short_name": "Puritan Parser",
+"description": "Spaced repetition training for reading the Greek New Testament",  "start_url": ".",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#2563eb",
