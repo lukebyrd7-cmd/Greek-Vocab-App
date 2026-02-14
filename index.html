@@ -9,12 +9,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Greek Master">
 
-    <title>Greek Master v4 (Connected)</title>
+    <title>Greek Master SRS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap');
         .greek-text { font-family: 'Noto Serif', serif; }
-        /* A simple spinner animation */
         .loader {
             border: 4px solid #1e293b;
             border-top: 4px solid #3b82f6;
@@ -30,110 +29,152 @@
 
     <div class="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 relative">
         
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-blue-400 font-bold text-lg">Greek Master</h1>
-                <p class="text-slate-500 text-[10px] uppercase tracking-tighter">Live Data Feed</p>
+                <p class="text-slate-500 text-[10px] uppercase tracking-tighter">Spaced Repetition System</p>
             </div>
             <div class="text-right">
-                <span class="text-xs text-slate-400 block">SCORE</span>
-                <span id="score" class="text-2xl font-mono text-white">0</span>
+                <span class="text-xs text-slate-400 block">MASTERED</span>
+                <span id="mastered-count" class="text-xl font-mono text-green-400">0</span>
+                <span class="text-xs text-slate-600">/ <span id="total-count">0</span></span>
             </div>
         </div>
 
-        <div id="loading-screen" class="absolute inset-0 bg-slate-900/90 z-10 flex flex-col items-center justify-center rounded-3xl">
+        <div id="loading-screen" class="absolute inset-0 bg-slate-900/95 z-50 flex flex-col items-center justify-center rounded-3xl">
             <div class="loader mb-4"></div>
-            <p class="text-blue-400 text-sm font-bold animate-pulse">Connecting to Server...</p>
+            <p class="text-blue-400 text-sm font-bold animate-pulse">Syncing Library...</p>
         </div>
 
-        <div id="error-screen" class="hidden absolute inset-0 bg-slate-900 z-20 flex flex-col items-center justify-center rounded-3xl p-6 text-center">
-            <div class="text-red-500 text-5xl mb-4">⚠️</div>
-            <h3 class="text-white font-bold mb-2">Connection Failed</h3>
-            <p id="error-msg" class="text-slate-400 text-sm mb-6">Could not fetch data.</p>
-            <button onclick="initApp()" class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-lg text-sm">Retry</button>
-        </div>
+        <div class="bg-slate-800/50 rounded-2xl p-8 mb-6 border border-slate-700/50 text-center min-h-[280px] flex flex-col justify-between relative overflow-hidden">
+            
+            <div class="flex justify-center space-x-1 mb-4" id="star-container">
+                </div>
 
-        <div class="mb-6">
-            <select id="typeFilter" onchange="loadCard()" class="w-full bg-slate-800 border border-slate-700 text-slate-300 py-2 px-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="all">All Words</option>
-                <option value="noun">Nouns Only</option>
-                <option value="verb">Verbs Only</option>
-            </select>
-        </div>
-
-        <div class="bg-slate-800/50 rounded-2xl p-10 mb-8 border border-slate-700/50 text-center min-h-[200px] flex flex-col justify-center">
-            <div id="word-tag" class="text-[10px] font-bold text-blue-500/80 uppercase mb-2 tracking-widest">---</div>
-            <h2 id="greek-word" class="greek-text text-5xl font-bold mb-4">...</h2>
-            <p id="definition" class="text-xl text-blue-300 font-medium hidden">...</p>
+            <div>
+                <div id="word-tag" class="text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">---</div>
+                <h2 id="greek-word" class="greek-text text-5xl font-bold mb-4 text-white">...</h2>
+                <p id="definition" class="text-xl text-blue-300 font-medium hidden">...</p>
+            </div>
+            
+            <div class="h-4"></div>
         </div>
 
         <div id="main-actions">
-            <button onclick="reveal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95">
+            <button onclick="reveal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-transform active:scale-95">
                 Reveal
             </button>
         </div>
 
         <div id="result-actions" class="hidden grid grid-cols-2 gap-4">
-            <button onclick="handleResult(false)" class="bg-slate-800 text-slate-400 font-bold py-4 rounded-2xl border border-slate-700">Missed</button>
-            <button onclick="handleResult(true)" class="bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20">Got It</button>
+            <button onclick="handleResult(false)" class="bg-slate-800 text-red-400 font-bold py-4 rounded-2xl border border-slate-700 hover:bg-slate-700 active:scale-95 transition-all">
+                Missed
+            </button>
+            <button onclick="handleResult(true)" class="bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-green-900/20 hover:bg-green-500 active:scale-95 transition-all">
+                Got It
+            </button>
+        </div>
+
+        <div class="mt-8 text-center">
+            <button onclick="resetProgress()" class="text-[10px] text-slate-700 hover:text-red-500 uppercase tracking-widest transition-colors">
+                Reset All Progress
+            </button>
         </div>
 
     </div>
 
     <script>
-        // *** PASTE YOUR RAW GITHUB JSON URL BELOW ***
+        // *** PASTE YOUR RAW GITHUB JSON URL HERE ***
         const DATA_URL = "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/refs/heads/main/vocab.json";
 
-        let vocab = []; // Empty initially
+        let vocab = [];
+        let progressMap = {}; // Will store { "word": masteryLevel (0-5) }
         let currentCard = {};
-        let score = parseInt(localStorage.getItem('greekScore')) || 0;
-        document.getElementById('score').innerText = score;
 
-        // The "System of Record" Connection
-        async function initApp() {
-            // Show Loading
-            document.getElementById('loading-screen').classList.remove('hidden');
-            document.getElementById('error-screen').classList.add('hidden');
-
-            try {
-                // 1. The Fetch Request (The API Call)
-                const response = await fetch(DATA_URL);
-                
-                // 2. Error Handling (The "Bad Request" Check)
-                if (!response.ok) throw new Error(`Server Error: ${response.status}`);
-
-                // 3. Parse Data (Read the JSON)
-                vocab = await response.json();
-                
-                // 4. Success: Hide Loader and Start
-                document.getElementById('loading-screen').classList.add('hidden');
-                loadCard();
-
-            } catch (error) {
-                // 5. Failure: Show Error Screen
-                console.error("Audit Log: Fetch Failed", error);
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('error-screen').classList.remove('hidden');
-                document.getElementById('error-msg').innerText = error.message;
+        // Load progress from phone memory
+        function loadProgress() {
+            const saved = localStorage.getItem('greek_srs_progress');
+            if (saved) {
+                progressMap = JSON.parse(saved);
             }
         }
 
+        function saveProgress() {
+            localStorage.setItem('greek_srs_progress', JSON.stringify(progressMap));
+            updateStats();
+        }
+
+        async function initApp() {
+            loadProgress();
+            try {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error("Network response was not ok");
+                vocab = await response.json();
+                
+                // Initialize new words in progressMap if they don't exist
+                vocab.forEach(v => {
+                    if (progressMap[v.word] === undefined) {
+                        progressMap[v.word] = 0; // Start at 0 mastery
+                    }
+                });
+                
+                document.getElementById('loading-screen').classList.add('hidden');
+                updateStats();
+                loadCard();
+            } catch (error) {
+                alert("Error loading data. Check your URL.");
+            }
+        }
+
+        // THE ALGORITHM: Weighted Random Selection
+        function getNextCard() {
+            // 1. Filter out fully mastered words (Level 5) unless ALL are mastered
+            let candidates = vocab.filter(v => progressMap[v.word] < 5);
+            
+            // If everything is mastered, celebrate! (But keep quizzing for review)
+            if (candidates.length === 0) candidates = vocab;
+
+            // 2. Weighting: Give words with lower scores HIGHER chance
+            // We create a "pool" where low-score words appear more often
+            let pool = [];
+            candidates.forEach(wordObj => {
+                const score = progressMap[wordObj.word];
+                // Formula: Level 0 gets 6 entries, Level 4 gets 2 entries
+                const weight = 6 - score; 
+                for (let i = 0; i < weight; i++) {
+                    pool.push(wordObj);
+                }
+            });
+
+            // Pick random from the weighted pool
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
         function loadCard() {
-            const filterValue = document.getElementById('typeFilter').value;
-            const filteredVocab = filterValue === 'all' ? vocab : vocab.filter(v => v.type === filterValue);
-
-            if (filteredVocab.length === 0) return; // Safety check
-
-            const randomIndex = Math.floor(Math.random() * filteredVocab.length);
-            currentCard = filteredVocab[randomIndex];
-
+            currentCard = getNextCard();
+            
+            // Update Text
             document.getElementById('greek-word').innerText = currentCard.word;
             document.getElementById('definition').innerText = currentCard.def;
             document.getElementById('word-tag').innerText = currentCard.type;
             
+            // Render Stars
+            renderStars(progressMap[currentCard.word]);
+
+            // Reset UI
             document.getElementById('definition').classList.add('hidden');
             document.getElementById('main-actions').classList.remove('hidden');
             document.getElementById('result-actions').classList.add('hidden');
+        }
+
+        function renderStars(level) {
+            const container = document.getElementById('star-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('div');
+                star.className = `w-2 h-2 rounded-full ${i < level ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.8)]' : 'bg-slate-700'}`;
+                container.appendChild(star);
+            }
         }
 
         function reveal() {
@@ -143,15 +184,38 @@
         }
 
         function handleResult(isCorrect) {
+            let currentLevel = progressMap[currentCard.word];
+
             if (isCorrect) {
-                score++;
-                document.getElementById('score').innerText = score;
-                localStorage.setItem('greekScore', score);
+                // Promotion: Cap at 5
+                if (currentLevel < 5) currentLevel++;
+            } else {
+                // Penalty: Reset to 0 (Strict SRS) or decrement? Let's be strict.
+                currentLevel = 0; 
             }
+
+            progressMap[currentCard.word] = currentLevel;
+            saveProgress();
             loadCard();
         }
 
-        // Start the engine
+        function updateStats() {
+            const total = vocab.length;
+            // Count how many words are at level 5
+            const mastered = vocab.filter(v => progressMap[v.word] === 5).length;
+            
+            document.getElementById('total-count').innerText = total;
+            document.getElementById('mastered-count').innerText = mastered;
+        }
+
+        function resetProgress() {
+            if(confirm("Reset all learning progress?")) {
+                localStorage.removeItem('greek_srs_progress');
+                progressMap = {};
+                location.reload();
+            }
+        }
+
         initApp();
     </script>
 </body>
