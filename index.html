@@ -1,201 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3665/3665923.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Greek Master Context</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap');
-        .greek-text { font-family: 'Noto Serif', serif; }
-        .loader { border: 3px solid #334155; border-top: 3px solid #60a5fa; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Greek Master — Spaced Repetition</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap');
+.greek-text { font-family: 'Noto Serif', serif; }
+.loader {
+  border: 3px solid #334155;
+  border-top: 3px solid #60a5fa;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen flex items-center justify-center p-4 font-sans">
 
-    <div class="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 relative flex flex-col h-[600px]">
-        
-        <div class="flex justify-between items-end mb-6 pb-4 border-b border-slate-800">
-            <div>
-                <h1 class="text-blue-400 font-bold text-lg tracking-tight">Greek Master</h1>
-                <p class="text-slate-500 text-[10px] uppercase tracking-widest font-semibold">Context Engine</p>
-            </div>
-            <div class="text-right">
-                <div class="text-[10px] text-slate-500 font-bold mb-1">MASTERY</div>
-                <div class="flex items-baseline justify-end">
-                    <span id="mastered-count" class="text-xl font-mono text-green-400 leading-none">0</span>
-                    <span class="text-xs text-slate-600 ml-1">/ <span id="total-count">0</span></span>
-                </div>
-            </div>
+<body class="bg-slate-950 text-slate-200 min-h-screen flex items-center justify-center p-4">
+
+<div class="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 relative flex flex-col h-[600px]">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-end mb-6 pb-4 border-b border-slate-800">
+    <div>
+      <h1 class="text-blue-400 font-bold text-lg">Greek Master</h1>
+      <p class="text-slate-500 text-[10px] uppercase tracking-widest font-semibold">
+        Spaced Repetition Engine
+      </p>
+    </div>
+    <div class="text-right">
+      <div class="text-[10px] text-slate-500 font-bold mb-1">MASTERED</div>
+      <div class="flex items-baseline justify-end">
+        <span id="mastered-count" class="text-xl font-mono text-green-400">0</span>
+        <span class="text-xs text-slate-600 ml-1">/ <span id="total-count">0</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading" class="absolute inset-0 bg-slate-900/95 z-50 flex flex-col items-center justify-center rounded-3xl">
+    <div class="loader mb-4"></div>
+    <p class="text-blue-400 text-xs font-bold tracking-widest animate-pulse">
+      LOADING VOCAB…
+    </p>
+  </div>
+
+  <!-- CARD -->
+  <div class="flex-grow flex flex-col justify-center relative">
+
+    <div class="absolute top-0 left-0 right-0 flex justify-center space-x-1 opacity-50" id="star-container"></div>
+
+    <div class="text-center">
+      <div id="word-tag" class="text-[10px] font-bold text-slate-600 uppercase mb-3 tracking-[0.2em]">
+        —
+      </div>
+
+      <h2 id="greek-word" class="greek-text text-5xl font-bold mb-6 text-white">
+        …
+      </h2>
+
+      <div id="answer" class="hidden">
+        <p id="definition" class="text-2xl text-blue-300 italic mb-6"></p>
+
+        <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 text-left">
+          <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">
+            Context <span id="ref"></span>
+          </p>
+          <p id="sentence" class="greek-text text-lg text-slate-300"></p>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div id="loading-screen" class="absolute inset-0 bg-slate-900/95 z-50 flex flex-col items-center justify-center rounded-3xl backdrop-blur-sm">
-            <div class="loader mb-4"></div>
-            <p class="text-blue-400 text-xs font-bold animate-pulse tracking-widest">CONNECTING TO REPO...</p>
-        </div>
-
-        <div class="flex-grow flex flex-col justify-center relative">
-            
-            <div class="absolute top-0 left-0 right-0 flex justify-center space-x-1 mb-4 opacity-50" id="star-container"></div>
-
-            <div class="text-center z-10">
-                <div id="word-tag" class="text-[10px] font-bold text-slate-600 uppercase mb-3 tracking-[0.2em]">NOUN</div>
-                
-                <h2 id="greek-word" class="greek-text text-5xl font-bold mb-6 text-white drop-shadow-lg transition-all duration-300">...</h2>
-                
-                <div id="definition-area" class="hidden transition-all duration-500 ease-out transform translate-y-2 opacity-0">
-                    <p id="definition" class="text-2xl text-blue-300 font-serif italic mb-6">...</p>
-                    
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 text-left">
-                        <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Biblical Context (<span id="ref-tag">...</span>)</p>
-                        <p id="sentence" class="greek-text text-lg text-slate-300 leading-relaxed">...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-6 pt-4">
-            <div id="main-actions">
-                <button onclick="reveal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98]">
-                    Reveal Answer
-                </button>
-            </div>
-
-            <div id="result-actions" class="hidden grid grid-cols-2 gap-3">
-                <button onclick="handleResult(false)" class="bg-slate-800 text-red-400 font-bold py-4 rounded-2xl border border-slate-700 hover:bg-slate-700 active:scale-[0.98]">
-                    Forgot
-                </button>
-                <button onclick="handleResult(true)" class="bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-green-900/20 hover:bg-green-500 active:scale-[0.98]">
-                    Mastered
-                </button>
-            </div>
-        </div>
-
+  <!-- ACTIONS -->
+  <div class="mt-6 pt-4">
+    <div id="reveal-actions">
+      <button onclick="reveal()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">
+        Reveal
+      </button>
     </div>
 
-    <script>
-        // *** PASTE YOUR RAW GITHUB JSON URL HERE ***
-        const DATA_URL = "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/refs/heads/main/vocab.json";
+    <div id="grade-actions" class="hidden grid grid-cols-2 gap-3">
+      <button onclick="grade(false)" class="bg-slate-800 text-red-400 py-4 rounded-2xl">
+        Forgot
+      </button>
+      <button onclick="grade(true)" class="bg-green-600 text-white py-4 rounded-2xl">
+        Knew It
+      </button>
+    </div>
+  </div>
 
-        let vocab = [];
-        let progressMap = {}; 
-        let currentCard = {};
+</div>
 
-        function loadProgress() {
-            const saved = localStorage.getItem('greek_srs_progress_v2'); // New save key for v2
-            if (saved) progressMap = JSON.parse(saved);
-        }
+<script>
+/* ==========================
+   CONFIG
+========================== */
+const DATA_URL =
+  "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/refs/heads/main/vocab.json";
 
-        function saveProgress() {
-            localStorage.setItem('greek_srs_progress_v2', JSON.stringify(progressMap));
-            updateStats();
-        }
+const STORAGE_KEY = "greek_srs_v3";
 
-        async function initApp() {
-            loadProgress();
-            try {
-                const response = await fetch(DATA_URL);
-                if (!response.ok) throw new Error("Network error");
-                vocab = await response.json();
-                
-                vocab.forEach(v => {
-                    if (progressMap[v.word] === undefined) progressMap[v.word] = 0;
-                });
-                
-                document.getElementById('loading-screen').classList.add('hidden');
-                updateStats();
-                loadCard();
-            } catch (error) {
-                console.error(error);
-                alert("Could not load data. Check URL format.");
-            }
-        }
+/* ==========================
+   STATE
+========================== */
+let vocab = [];
+let progress = {};
+let current = null;
 
-        function getNextCard() {
-            let candidates = vocab.filter(v => progressMap[v.word] < 5);
-            if (candidates.length === 0) candidates = vocab;
+/* ==========================
+   UTIL
+========================== */
+function today() {
+  return Date.now();
+}
 
-            let pool = [];
-            candidates.forEach(wordObj => {
-                const score = progressMap[wordObj.word];
-                const weight = 6 - score; 
-                for (let i = 0; i < weight; i++) pool.push(wordObj);
-            });
+/* ==========================
+   LOAD / SAVE
+========================== */
+function loadProgress() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) progress = JSON.parse(saved);
+}
 
-            return pool[Math.floor(Math.random() * pool.length)];
-        }
+function saveProgress() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  updateStats();
+}
 
-        function loadCard() {
-            currentCard = getNextCard();
-            
-            // Fill Data
-            document.getElementById('greek-word').innerText = currentCard.word;
-            document.getElementById('definition').innerText = currentCard.def;
-            document.getElementById('word-tag').innerText = currentCard.type;
-            
-            // NEW: Fill Context Data
-            // Use logical OR (||) to handle cases where your JSON might miss a sentence
-            document.getElementById('sentence').innerText = currentCard.sentence || "No context available.";
-            document.getElementById('ref-tag').innerText = currentCard.ref || "";
-            
-            renderStars(progressMap[currentCard.word]);
+/* ==========================
+   INIT
+========================== */
+async function init() {
+  loadProgress();
 
-            // Reset UI States
-            const defArea = document.getElementById('definition-area');
-            defArea.classList.add('hidden');
-            defArea.classList.remove('opacity-100', 'translate-y-0'); // Animation reset
-            defArea.classList.add('opacity-0', 'translate-y-2');
+  const res = await fetch(DATA_URL);
+  vocab = await res.json();
 
-            document.getElementById('main-actions').classList.remove('hidden');
-            document.getElementById('result-actions').classList.add('hidden');
-        }
+  vocab.forEach(v => {
+    if (!progress[v.word]) {
+      progress[v.word] = {
+        level: 0,
+        interval: 0,
+        due: today()
+      };
+    }
+  });
 
-        function renderStars(level) {
-            const container = document.getElementById('star-container');
-            container.innerHTML = '';
-            for (let i = 0; i < 5; i++) {
-                const star = document.createElement('div');
-                star.className = `w-1.5 h-1.5 rounded-full transition-all duration-300 ${i < level ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)] scale-110' : 'bg-slate-800'}`;
-                container.appendChild(star);
-            }
-        }
+  document.getElementById("loading").classList.add("hidden");
+  updateStats();
+  nextCard();
+}
 
-        function reveal() {
-            const defArea = document.getElementById('definition-area');
-            defArea.classList.remove('hidden');
-            
-            // Small timeout to allow the browser to realize it's visible before animating
-            setTimeout(() => {
-                defArea.classList.remove('opacity-0', 'translate-y-2');
-                defArea.classList.add('opacity-100', 'translate-y-0');
-            }, 10);
+/* ==========================
+   SCHEDULING
+========================== */
+function dueCards() {
+  return vocab.filter(v => progress[v.word].due <= today());
+}
 
-            document.getElementById('main-actions').classList.add('hidden');
-            document.getElementById('result-actions').classList.remove('hidden');
-        }
+function nextCard() {
+  const due = dueCards();
+  const pool = due.length ? due : vocab;
 
-        function handleResult(isCorrect) {
-            let currentLevel = progressMap[currentCard.word];
-            if (isCorrect) {
-                if (currentLevel < 5) currentLevel++;
-            } else {
-                currentLevel = 0; 
-            }
-            progressMap[currentCard.word] = currentLevel;
-            saveProgress();
-            loadCard();
-        }
+  // weighted by low mastery
+  let weighted = [];
+  pool.forEach(v => {
+    const lvl = progress[v.word].level;
+    const weight = 6 - lvl;
+    for (let i = 0; i < weight; i++) weighted.push(v);
+  });
 
-        function updateStats() {
-            document.getElementById('total-count').innerText = vocab.length;
-            document.getElementById('mastered-count').innerText = vocab.filter(v => progressMap[v.word] === 5).length;
-        }
+  current = weighted[Math.floor(Math.random() * weighted.length)];
+  render();
+}
 
-        initApp();
-    </script>
+/* ==========================
+   RENDER
+========================== */
+function render() {
+  document.getElementById("greek-word").innerText = current.word;
+  document.getElementById("definition").innerText = current.def;
+  document.getElementById("word-tag").innerText = current.type;
+  document.getElementById("sentence").innerText = current.sentence || "";
+  document.getElementById("ref").innerText = current.ref || "";
+
+  renderStars(progress[current.word].level);
+
+  document.getElementById("answer").classList.add("hidden");
+  document.getElementById("reveal-actions").classList.remove("hidden");
+  document.getElementById("grade-actions").classList.add("hidden");
+}
+
+function renderStars(level) {
+  const c = document.getElementById("star-container");
+  c.innerHTML = "";
+  for (let i = 0; i < 5; i++) {
+    const d = document.createElement("div");
+    d.className = `w-1.5 h-1.5 rounded-full ${i < level ? "bg-green-400" : "bg-slate-700"}`;
+    c.appendChild(d);
+  }
+}
+
+/* ==========================
+   ACTIONS
+========================== */
+function reveal() {
+  document.getElementById("answer").classList.remove("hidden");
+  document.getElementById("reveal-actions").classList.add("hidden");
+  document.getElementById("grade-actions").classList.remove("hidden");
+}
+
+function grade(correct) {
+  const p = progress[current.word];
+
+  const intervals = [0, 1, 3, 7, 21, 60];
+
+  if (correct) {
+    p.level = Math.min(p.level + 1, 5);
+    p.interval = intervals[p.level];
+  } else {
+    p.level = 0;
+    p.interval = 1;
+  }
+
+  p.due = today() + p.interval * 86400000;
+  saveProgress();
+  nextCard();
+}
+
+/* ==========================
+   STATS
+========================== */
+function updateStats() {
+  document.getElementById("total-count").innerText = vocab.length;
+  document.getElementById("mastered-count").innerText =
+    vocab.filter(v => progress[v.word].level === 5).length;
+}
+
+init();
+</script>
+
 </body>
 </html>
