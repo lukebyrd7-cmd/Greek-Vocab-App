@@ -1,0 +1,26 @@
+[
+  {
+    "lemma": "λόγος",
+    "gloss": "word, message",
+    "pos": "noun",
+    "frequency": 330,
+    "example": "ἐν ἀρχῇ ἦν ὁ λόγος",
+    "ref": "John 1:1"
+  },
+  {
+    "lemma": "θεός",
+    "gloss": "God",
+    "pos": "noun",
+    "frequency": 850,
+    "example": "ὁ θεὸς ἀγάπη ἐστίν",
+    "ref": "1 John 4:8"
+  },
+  {
+    "lemma": "ἀγαπάω",
+    "gloss": "love",
+    "pos": "verb",
+    "frequency": 500,
+    "example": "ἀγαπᾶτε τοὺς ἐχθρούς ὑμῶν",
+    "ref": "Matthew 5:44"
+  }
+]
