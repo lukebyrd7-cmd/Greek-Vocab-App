@@ -6,9 +6,6 @@
 
 <title>The Puritan Parser</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2563eb">
-
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
@@ -23,7 +20,10 @@
   height: 24px;
   animation: spin 1s linear infinite;
 }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
 </head>
 
@@ -34,7 +34,7 @@
   <!-- HEADER -->
   <div class="flex justify-between items-end mb-6 pb-4 border-b border-slate-800">
     <div>
-      <h1 class="text-blue-400 font-bold text-lg tracking-tight">The Puritan Parser</h1>
+      <h1 class="text-blue-400 font-bold text-lg">The Puritan Parser</h1>
       <p class="text-slate-500 text-[10px] uppercase tracking-widest font-semibold">
         Spaced Repetition Engine
       </p>
@@ -59,12 +59,12 @@
   <!-- CARD -->
   <div class="flex-grow flex flex-col justify-center relative">
 
-    <div class="absolute top-0 left-0 right-0 flex justify-center space-x-1 opacity-50" id="star-container"></div>
+    <div id="star-container" class="absolute top-0 left-0 right-0 flex justify-center space-x-1 opacity-50"></div>
 
     <div class="text-center">
       <div id="word-tag" class="text-[10px] font-bold text-slate-600 uppercase mb-3 tracking-[0.2em]">—</div>
 
-      <h2 id="greek-word" class="greek-text text-5xl font-bold mb-6 text-white">…</h2>
+      <h2 id="greek-word" class="greek-text text-5xl font-bold mb-6 text-white">—</h2>
 
       <div id="answer" class="hidden">
         <p id="definition" class="text-2xl text-blue-300 italic mb-6"></p>
@@ -102,9 +102,11 @@
 // ==========================
 // CONFIG
 // ==========================
-const DATA_URL = "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/main/vocab.json";
+const DATA_URL =
+  "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/main/vocab.json";
+
 const STORAGE_KEY = "puritan-parser-progress";
-let minFrequency = 0;
+const minFrequency = 100;
 
 // ==========================
 // STATE
@@ -116,29 +118,18 @@ let current = null;
 // ==========================
 // UTIL
 // ==========================
-function today() {
-  return Date.now();
-}
+const today = () => Date.now();
 
 // ==========================
-// LOAD / SAVE
+// STORAGE
 // ==========================
 function loadProgress() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) progress = JSON.parse(saved);
-  } catch (e) {
-    console.warn("Failed to load progress:", e);
-    progress = {};
-  }
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) progress = JSON.parse(saved);
 }
 
 function saveProgress() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  } catch (e) {
-    console.warn("Failed to save progress:", e);
-  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
   updateStats();
 }
 
@@ -154,10 +145,6 @@ async function init() {
 
     vocab = await res.json();
 
-    if (!Array.isArray(vocab)) {
-      throw new Error("Invalid vocab format");
-    }
-
     vocab.forEach(v => {
       if (!progress[v.lemma]) {
         progress[v.lemma] = { level: 0, interval: 0, due: today() };
@@ -170,7 +157,7 @@ async function init() {
 
   } catch (err) {
     console.error(err);
-    document.getElementById("loading-text").innerText = "FAILED TO LOAD VOCAB";
+    document.getElementById("loading-text").innerText = "FAILED TO LOAD";
   }
 }
 
@@ -191,21 +178,14 @@ function dueCards() {
 function nextCard() {
   const available = filteredVocab();
   if (!available.length) {
-    document.getElementById("greek-word").innerText = "No vocab found.";
+    document.getElementById("greek-word").innerText = "No vocab found";
     return;
   }
 
   const due = dueCards();
   const pool = due.length ? due : available;
 
-  let weighted = [];
-  pool.forEach(v => {
-    const lvl = progress[v.lemma].level;
-    const weight = Math.max(1, 6 - lvl);
-    for (let i = 0; i < weight; i++) weighted.push(v);
-  });
-
-  current = weighted[Math.floor(Math.random() * weighted.length)];
+  current = pool[Math.floor(Math.random() * pool.length)];
   render();
 }
 
@@ -213,13 +193,11 @@ function nextCard() {
 // RENDER
 // ==========================
 function render() {
-  if (!current) return;
-
   document.getElementById("greek-word").innerText = current.lemma;
   document.getElementById("definition").innerText = current.gloss;
-  document.getElementById("word-tag").innerText = current.pos || "";
-  document.getElementById("sentence").innerText = current.example || "";
-  document.getElementById("ref").innerText = current.ref || "";
+  document.getElementById("word-tag").innerText = current.pos;
+  document.getElementById("sentence").innerText = current.example;
+  document.getElementById("ref").innerText = current.ref;
 
   renderStars(progress[current.lemma].level);
 
@@ -232,11 +210,11 @@ function renderStars(level) {
   const c = document.getElementById("star-container");
   c.innerHTML = "";
   for (let i = 0; i < 5; i++) {
-    const d = document.createElement("div");
-    d.className =
+    const dot = document.createElement("div");
+    dot.className =
       "w-1.5 h-1.5 rounded-full " +
       (i < level ? "bg-green-400" : "bg-slate-700");
-    c.appendChild(d);
+    c.appendChild(dot);
   }
 }
 
@@ -250,8 +228,6 @@ function reveal() {
 }
 
 function grade(correct) {
-  if (!current) return;
-
   const p = progress[current.lemma];
   const intervals = [0, 1, 3, 7, 21, 60];
 
@@ -274,9 +250,8 @@ function grade(correct) {
 function updateStats() {
   const active = filteredVocab();
   document.getElementById("total-count").innerText = active.length;
-
-  const mastered = active.filter(v => progress[v.lemma]?.level === 5).length;
-  document.getElementById("mastered-count").innerText = mastered;
+  document.getElementById("mastered-count").innerText =
+    active.filter(v => progress[v.lemma].level === 5).length;
 }
 
 init();
