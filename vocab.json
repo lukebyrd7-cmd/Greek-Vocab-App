@@ -1,42 +1,42 @@
 [
-  { 
-    "word": "θεός", 
-    "def": "God", 
-    "type": "noun",
+  {
+    "lemma": "θεός",
+    "gloss": "God",
+    "pos": "noun",
     "frequency": 1340,
-    "sentence": "Ἐν ἀρχῇ ἦν ὁ Λόγος, καὶ ὁ Λόγος ἦν πρὸς τὸν Θεόν",
+    "example": "Ἐν ἀρχῇ ἦν ὁ Λόγος, καὶ ὁ Λόγος ἦν πρὸς τὸν Θεόν",
     "ref": "John 1:1"
   },
-  { 
-    "word": "λόγος", 
-    "def": "Word", 
-    "type": "noun",
+  {
+    "lemma": "λόγος",
+    "gloss": "word",
+    "pos": "noun",
     "frequency": 330,
-    "sentence": "ὁ λόγος σὰρξ ἐγένετο",
+    "example": "ὁ λόγος σὰρξ ἐγένετο",
     "ref": "John 1:14"
   },
-  { 
-    "word": "ἀγάπη", 
-    "def": "Love", 
-    "type": "noun",
+  {
+    "lemma": "ἀγάπη",
+    "gloss": "love",
+    "pos": "noun",
     "frequency": 116,
-    "sentence": "ὁ Θεὸς ἀγάπη ἐστίν",
+    "example": "ὁ Θεὸς ἀγάπη ἐστίν",
     "ref": "1 John 4:8"
   },
-  { 
-    "word": "βλέπω", 
-    "def": "I see", 
-    "type": "verb",
+  {
+    "lemma": "βλέπω",
+    "gloss": "I see",
+    "pos": "verb",
     "frequency": 133,
-    "sentence": "βλέπομεν γὰρ ἄρτι δι’ ἐσόπτρου",
+    "example": "βλέπομεν γὰρ ἄρτι δι’ ἐσόπτρου",
     "ref": "1 Cor 13:12"
   },
-  { 
-    "word": "ἔχω", 
-    "def": "I have", 
-    "type": "verb",
+  {
+    "lemma": "ἔχω",
+    "gloss": "I have",
+    "pos": "verb",
     "frequency": 708,
-    "sentence": "ἀρχιερέα μέγαν... Ἰησοῦν",
+    "example": "ἀρχιερέα μέγαν... Ἰησοῦν",
     "ref": "Heb 4:14"
   }
 ]
