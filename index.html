@@ -14,6 +14,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap');
 .greek-text { font-family: 'Noto Serif', serif; }
+
 .loader {
   border: 3px solid #334155;
   border-top: 3px solid #60a5fa;
@@ -50,7 +51,7 @@
   <!-- LOADING -->
   <div id="loading" class="absolute inset-0 bg-slate-900/95 z-50 flex flex-col items-center justify-center rounded-3xl">
     <div class="loader mb-4"></div>
-    <p class="text-blue-400 text-xs font-bold tracking-widest animate-pulse">
+    <p id="loading-text" class="text-blue-400 text-xs font-bold tracking-widest animate-pulse">
       LOADING VOCAB…
     </p>
   </div>
@@ -68,7 +69,9 @@
       <div id="answer" class="hidden">
         <p id="definition" class="text-2xl text-blue-300 italic mb-6"></p>
         <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 text-left">
-          <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Context <span id="ref"></span></p>
+          <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">
+            Context <span id="ref"></span>
+          </p>
           <p id="sentence" class="greek-text text-lg text-slate-300"></p>
         </div>
       </div>
@@ -78,12 +81,18 @@
   <!-- ACTIONS -->
   <div class="mt-6 pt-4">
     <div id="reveal-actions">
-      <button onclick="reveal()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">Reveal</button>
+      <button onclick="reveal()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">
+        Reveal
+      </button>
     </div>
 
     <div id="grade-actions" class="hidden grid grid-cols-2 gap-3">
-      <button onclick="grade(false)" class="bg-slate-800 text-red-400 py-4 rounded-2xl">Forgot</button>
-      <button onclick="grade(true)" class="bg-green-600 text-white py-4 rounded-2xl">Knew It</button>
+      <button onclick="grade(false)" class="bg-slate-800 text-red-400 py-4 rounded-2xl">
+        Forgot
+      </button>
+      <button onclick="grade(true)" class="bg-green-600 text-white py-4 rounded-2xl">
+        Knew It
+      </button>
     </div>
   </div>
 
@@ -94,7 +103,7 @@
 // CONFIG
 // ==========================
 const DATA_URL = "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/main/vocab.json";
-// Default frequency filter
+const STORAGE_KEY = "puritan-parser-progress";
 let minFrequency = 25;
 
 // ==========================
@@ -107,17 +116,29 @@ let current = null;
 // ==========================
 // UTIL
 // ==========================
-function today() { return Date.now(); }
+function today() {
+  return Date.now();
+}
 
 // ==========================
 // LOAD / SAVE
 // ==========================
 function loadProgress() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) progress = JSON.parse(saved);
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) progress = JSON.parse(saved);
+  } catch (e) {
+    console.warn("Failed to load progress:", e);
+    progress = {};
+  }
 }
+
 function saveProgress() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  } catch (e) {
+    console.warn("Failed to save progress:", e);
+  }
   updateStats();
 }
 
@@ -125,42 +146,62 @@ function saveProgress() {
 // INIT
 // ==========================
 async function init() {
-  loadProgress();
+  try {
+    loadProgress();
 
-  const res = await fetch(DATA_URL);
-  vocab = await res.json();
+    const res = await fetch(DATA_URL);
+    if (!res.ok) throw new Error("Fetch failed");
 
-  vocab.forEach(v => {
-    if (!progress[v.lemma]) {
-      progress[v.lemma] = { level: 0, interval: 0, due: today() };
+    vocab = await res.json();
+
+    if (!Array.isArray(vocab)) {
+      throw new Error("Invalid vocab format");
     }
-  });
 
-  document.getElementById("loading").classList.add("hidden");
-  updateStats();
-  nextCard();
+    vocab.forEach(v => {
+      if (!progress[v.lemma]) {
+        progress[v.lemma] = { level: 0, interval: 0, due: today() };
+      }
+    });
+
+    document.getElementById("loading").classList.add("hidden");
+    updateStats();
+    nextCard();
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("loading-text").innerText = "FAILED TO LOAD VOCAB";
+  }
 }
 
 // ==========================
-// SCHEDULING
+// FILTERING
 // ==========================
 function filteredVocab() {
   return vocab.filter(v => v.frequency >= minFrequency);
 }
 
 function dueCards() {
-  const active = filteredVocab();
-  return active.filter(v => progress[v.lemma].due <= today());
+  return filteredVocab().filter(v => progress[v.lemma].due <= today());
 }
 
+// ==========================
+// CARD SELECTION
+// ==========================
 function nextCard() {
+  const available = filteredVocab();
+  if (!available.length) {
+    document.getElementById("greek-word").innerText = "No vocab found.";
+    return;
+  }
+
   const due = dueCards();
-  const pool = due.length ? due : filteredVocab();
+  const pool = due.length ? due : available;
 
   let weighted = [];
   pool.forEach(v => {
     const lvl = progress[v.lemma].level;
-    const weight = 6 - lvl;
+    const weight = Math.max(1, 6 - lvl);
     for (let i = 0; i < weight; i++) weighted.push(v);
   });
 
@@ -172,9 +213,11 @@ function nextCard() {
 // RENDER
 // ==========================
 function render() {
+  if (!current) return;
+
   document.getElementById("greek-word").innerText = current.lemma;
   document.getElementById("definition").innerText = current.gloss;
-  document.getElementById("word-tag").innerText = current.pos;
+  document.getElementById("word-tag").innerText = current.pos || "";
   document.getElementById("sentence").innerText = current.example || "";
   document.getElementById("ref").innerText = current.ref || "";
 
@@ -190,7 +233,9 @@ function renderStars(level) {
   c.innerHTML = "";
   for (let i = 0; i < 5; i++) {
     const d = document.createElement("div");
-    d.className = `w-1.5 h-1.5 rounded-full ${i < level ? "bg-green-400" : "bg-slate-700"}`;
+    d.className =
+      "w-1.5 h-1.5 rounded-full " +
+      (i < level ? "bg-green-400" : "bg-slate-700");
     c.appendChild(d);
   }
 }
@@ -205,6 +250,8 @@ function reveal() {
 }
 
 function grade(correct) {
+  if (!current) return;
+
   const p = progress[current.lemma];
   const intervals = [0, 1, 3, 7, 21, 60];
 
@@ -225,9 +272,11 @@ function grade(correct) {
 // STATS
 // ==========================
 function updateStats() {
-  document.getElementById("total-count").innerText = filteredVocab().length;
-  document.getElementById("mastered-count").innerText =
-    filteredVocab().filter(v => progress[v.lemma].level === 5).length;
+  const active = filteredVocab();
+  document.getElementById("total-count").innerText = active.length;
+
+  const mastered = active.filter(v => progress[v.lemma]?.level === 5).length;
+  document.getElementById("mastered-count").innerText = mastered;
 }
 
 init();
