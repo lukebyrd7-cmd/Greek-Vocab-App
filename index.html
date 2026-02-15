@@ -29,10 +29,10 @@
 
 <body class="bg-slate-950 text-slate-200 min-h-screen flex items-center justify-center p-4">
 
-<div class="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 relative flex flex-col h-[600px]">
+<div class="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 relative flex flex-col h-[700px]">
 
   <!-- HEADER -->
-  <div class="flex justify-between items-end mb-6 pb-4 border-b border-slate-800">
+  <div class="flex justify-between items-end mb-4 pb-2 border-b border-slate-800">
     <div>
       <h1 class="text-blue-400 font-bold text-lg">The Puritan Parser</h1>
       <p class="text-slate-500 text-[10px] uppercase tracking-widest font-semibold">
@@ -46,6 +46,14 @@
         <span class="text-xs text-slate-600 ml-1">/ <span id="total-count">0</span></span>
       </div>
     </div>
+  </div>
+
+  <!-- FREQUENCY SLIDER -->
+  <div class="mb-4 text-center">
+    <label for="freq-slider" class="text-xs text-slate-400 font-bold uppercase tracking-widest">
+      Min Frequency: <span id="freq-label">100</span>+
+    </label>
+    <input id="freq-slider" type="range" min="1" max="50" value="100" step="1" class="w-full mt-1">
   </div>
 
   <!-- LOADING -->
@@ -102,11 +110,9 @@
 // ==========================
 // CONFIG
 // ==========================
-const DATA_URL =
-  "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/main/vocab.json";
-
+const DATA_URL = "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/main/vocab.json";
 const STORAGE_KEY = "puritan-parser-progress";
-const minFrequency = 100;
+let minFrequency = 100;
 
 // ==========================
 // STATE
@@ -139,10 +145,8 @@ function saveProgress() {
 async function init() {
   try {
     loadProgress();
-
     const res = await fetch(DATA_URL);
     if (!res.ok) throw new Error("Fetch failed");
-
     vocab = await res.json();
 
     vocab.forEach(v => {
@@ -165,7 +169,7 @@ async function init() {
 // FILTERING
 // ==========================
 function filteredVocab() {
-  return vocab.filter(v => v.frequency >= minFrequency);
+  return vocab.filter(v => v.frequency >= (minFrequency || 1));
 }
 
 function dueCards() {
@@ -253,6 +257,19 @@ function updateStats() {
   document.getElementById("mastered-count").innerText =
     active.filter(v => progress[v.lemma].level === 5).length;
 }
+
+// ==========================
+// FREQUENCY SLIDER
+// ==========================
+const freqSlider = document.getElementById("freq-slider");
+const freqLabel = document.getElementById("freq-label");
+
+freqSlider.addEventListener("input", () => {
+  minFrequency = parseInt(freqSlider.value);
+  freqLabel.innerText = minFrequency + "+";
+  updateStats();
+  nextCard();
+});
 
 init();
 </script>
