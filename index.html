@@ -51,9 +51,9 @@
   <!-- FREQUENCY SLIDER -->
   <div class="mb-4 text-center">
     <label for="freq-slider" class="text-xs text-slate-400 font-bold uppercase tracking-widest">
-      Min Frequency: <span id="freq-label">100</span>+
+      Min Frequency: <span id="freq-label">—</span>+
     </label>
-    <input id="freq-slider" type="range" min="1" max="50" value="100" step="1" class="w-full mt-1">
+    <input id="freq-slider" type="range" min="0" max="100" value="0" step="1" class="w-full mt-1">
   </div>
 
   <!-- LOADING -->
@@ -112,7 +112,7 @@
 // ==========================
 const DATA_URL = "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/main/vocab.json";
 const STORAGE_KEY = "puritan-parser-progress";
-let minFrequency = 100;
+let minFrequency = 0;
 
 // ==========================
 // STATE
@@ -120,6 +120,8 @@ let minFrequency = 100;
 let vocab = [];
 let progress = {};
 let current = null;
+let minFreq = 0;
+let maxFreq = 0;
 
 // ==========================
 // UTIL
@@ -149,6 +151,21 @@ async function init() {
     if (!res.ok) throw new Error("Fetch failed");
     vocab = await res.json();
 
+    // Compute frequency range for slider
+    if (vocab.length) {
+      minFreq = Math.min(...vocab.map(v => v.frequency));
+      maxFreq = Math.max(...vocab.map(v => v.frequency));
+    }
+
+    // Initialize slider to default frequency (~100)
+    const defaultMin = 100;
+    const defaultPct = ((defaultMin - minFreq) / (maxFreq - minFreq)) * 100;
+    const freqSlider = document.getElementById("freq-slider");
+    const freqLabel = document.getElementById("freq-label");
+    freqSlider.value = Math.round(defaultPct);
+    minFrequency = defaultMin;
+    freqLabel.innerText = minFrequency;
+
     vocab.forEach(v => {
       if (!progress[v.lemma]) {
         progress[v.lemma] = { level: 0, interval: 0, due: today() };
@@ -158,6 +175,15 @@ async function init() {
     document.getElementById("loading").classList.add("hidden");
     updateStats();
     nextCard();
+
+    // Slider listener
+    freqSlider.addEventListener("input", () => {
+      const pct = parseInt(freqSlider.value) / 100;
+      minFrequency = Math.round(minFreq + pct * (maxFreq - minFreq));
+      freqLabel.innerText = minFrequency;
+      updateStats();
+      nextCard();
+    });
 
   } catch (err) {
     console.error(err);
@@ -169,7 +195,7 @@ async function init() {
 // FILTERING
 // ==========================
 function filteredVocab() {
-  return vocab.filter(v => v.frequency >= (minFrequency || 1));
+  return vocab.filter(v => v.frequency >= (minFrequency || minFreq));
 }
 
 function dueCards() {
@@ -257,19 +283,6 @@ function updateStats() {
   document.getElementById("mastered-count").innerText =
     active.filter(v => progress[v.lemma].level === 5).length;
 }
-
-// ==========================
-// FREQUENCY SLIDER
-// ==========================
-const freqSlider = document.getElementById("freq-slider");
-const freqLabel = document.getElementById("freq-label");
-
-freqSlider.addEventListener("input", () => {
-  minFrequency = parseInt(freqSlider.value);
-  freqLabel.innerText = minFrequency + "+";
-  updateStats();
-  nextCard();
-});
 
 init();
 </script>
