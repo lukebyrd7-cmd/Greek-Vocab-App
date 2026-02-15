@@ -266,11 +266,11 @@ const freqLabel = document.getElementById("freq-label");
 
 freqSlider.addEventListener("input", () => {
   minFrequency = parseInt(freqSlider.value);
-  freqLabel.innerText = minFrequency + "+";
+  freqLabel.innerText = minFrequency + "+"; // only one plus sign
   updateStats();
   nextCard();
 });
-
+  
 init();
 </script>
 
