@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>The Puritan Parser</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -11,220 +10,177 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap');
 .greek-text { font-family: 'Noto Serif', serif; }
-
-.loader {
-  border: 3px solid #334155;
-  border-top: 3px solid #60a5fa;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
 </style>
 </head>
 
-<body class="bg-slate-950 text-slate-200 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-950 text-slate-200 min-h-screen p-4 flex justify-center">
 
-<div class="w-full max-w-sm bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 relative flex flex-col h-[700px]">
+<div class="w-full max-w-3xl bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-2xl">
 
-  <!-- HEADER -->
-  <div class="flex justify-between items-end mb-4 pb-2 border-b border-slate-800">
-    <div>
-      <h1 class="text-blue-400 font-bold text-lg">The Puritan Parser</h1>
-      <p class="text-slate-500 text-[10px] uppercase tracking-widest font-semibold">
-        Spaced Repetition Engine
-      </p>
-    </div>
-    <div class="text-right">
-      <div class="text-[10px] text-slate-500 font-bold mb-1">MASTERED</div>
-      <div class="flex items-baseline justify-end">
-        <span id="mastered-count" class="text-xl font-mono text-green-400">0</span>
-        <span class="text-xs text-slate-600 ml-1">/ <span id="total-count">0</span></span>
-      </div>
-    </div>
-  </div>
-
-  <!-- FREQUENCY SLIDER (1–50+) -->
-  <div class="mb-4 text-center">
-    <label for="freq-slider" class="text-xs text-slate-400 font-bold uppercase tracking-widest">
-      Min Frequency: <span id="freq-label">25</span>+
-    </label>
-    <input id="freq-slider" type="range" min="1" max="50" value="25" step="1" class="w-full mt-1">
-  </div>
-
-  <!-- LOADING -->
-  <div id="loading" class="absolute inset-0 bg-slate-900/95 z-50 flex flex-col items-center justify-center rounded-3xl">
-    <div class="loader mb-4"></div>
-    <p id="loading-text" class="text-blue-400 text-xs font-bold tracking-widest animate-pulse">
-      LOADING VOCAB…
+<!-- HEADER -->
+<div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+  <div>
+    <h1 class="text-blue-400 font-bold text-lg">The Puritan Parser</h1>
+    <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold">
+      GNT Fluency Engine
     </p>
   </div>
 
-  <!-- CARD -->
-  <div class="flex-grow flex flex-col justify-center relative">
+  <div class="flex gap-2">
+    <button onclick="switchView('study')" id="study-tab"
+      class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold">
+      Study
+    </button>
+    <button onclick="switchView('dashboard')" id="dashboard-tab"
+      class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm font-bold">
+      Dashboard
+    </button>
+  </div>
+</div>
 
-    <div id="star-container" class="absolute top-0 left-0 right-0 flex justify-center space-x-1 opacity-50"></div>
+<!-- FREQUENCY SLIDER -->
+<div class="mb-4">
+  <label class="text-xs text-slate-400 uppercase font-bold tracking-widest">
+    Min Frequency: <span id="freq-label">25+</span>
+  </label>
+  <input id="freq-slider" type="range" min="1" max="50" value="25"
+    class="w-full mt-1">
+</div>
 
-    <div class="text-center">
-      <div id="word-tag" class="text-[10px] font-bold text-slate-600 uppercase mb-3 tracking-[0.2em]">—</div>
+<!-- STUDY VIEW -->
+<div id="study-view">
 
-      <h2 id="greek-word" class="greek-text text-5xl font-bold mb-6 text-white">—</h2>
+  <div class="text-center my-16">
+    <div id="word-tag" class="text-xs text-slate-500 uppercase tracking-widest mb-2">—</div>
+    <h2 id="greek-word" class="greek-text text-5xl font-bold mb-6">—</h2>
 
-      <div id="answer" class="hidden">
-        <p id="definition" class="text-2xl text-blue-300 italic mb-6"></p>
-        <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 text-left">
-          <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">
-            Context <span id="ref"></span>
-          </p>
-          <p id="sentence" class="greek-text text-lg text-slate-300"></p>
-        </div>
-      </div>
+    <div id="answer" class="hidden">
+      <p id="definition" class="text-2xl text-blue-300 italic mb-4"></p>
+      <p class="text-xs uppercase text-slate-500 font-bold mb-1">
+        Context <span id="ref"></span>
+      </p>
+      <p id="sentence" class="greek-text text-lg text-slate-300"></p>
     </div>
   </div>
 
-  <!-- ACTIONS -->
-  <div class="mt-6 pt-4">
-    <div id="reveal-actions">
-      <button onclick="reveal()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">
-        Reveal
-      </button>
-    </div>
-
-    <div id="grade-actions" class="hidden grid grid-cols-2 gap-3">
-      <button onclick="grade(false)" class="bg-slate-800 text-red-400 py-4 rounded-2xl">
-        Forgot
-      </button>
-      <button onclick="grade(true)" class="bg-green-600 text-white py-4 rounded-2xl">
-        Knew It
-      </button>
-    </div>
+  <div id="reveal-actions">
+    <button onclick="reveal()"
+      class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">
+      Reveal
+    </button>
   </div>
+
+  <div id="grade-actions" class="hidden grid grid-cols-2 gap-3">
+    <button onclick="grade(false)"
+      class="bg-slate-800 text-red-400 py-4 rounded-2xl">
+      Forgot
+    </button>
+    <button onclick="grade(true)"
+      class="bg-green-600 text-white py-4 rounded-2xl">
+      Knew It
+    </button>
+  </div>
+</div>
+
+<!-- DASHBOARD VIEW -->
+<div id="dashboard-view" class="hidden">
+
+  <div class="flex gap-3 mb-4">
+    <input id="search"
+      placeholder="Search lemma or gloss…"
+      class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm">
+    <select id="sort"
+      class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm">
+      <option value="frequency">Frequency</option>
+      <option value="level">Mastery</option>
+      <option value="due">Due Date</option>
+    </select>
+  </div>
+
+  <div class="overflow-auto max-h-[600px]">
+    <table class="w-full text-sm">
+      <thead class="sticky top-0 bg-slate-900">
+        <tr class="text-slate-400 text-xs uppercase">
+          <th class="text-left py-2">Lemma</th>
+          <th>Gloss</th>
+          <th>Freq</th>
+          <th>Level</th>
+          <th>Due</th>
+          <th>EF</th>
+          <th>Rep</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="dashboard-table"></tbody>
+    </table>
+  </div>
+</div>
 
 </div>
 
 <script>
-// ==========================
-// CONFIG
-// ==========================
 const DATA_URL = "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/main/vocab.json";
 const STORAGE_KEY = "puritan-parser-progress";
 let minFrequency = 25;
-
-// ==========================
-// STATE
-// ==========================
 let vocab = [];
 let progress = {};
 let current = null;
+let view = "study";
 
-// ==========================
-// UTIL
-// ==========================
 const today = () => Date.now();
 
-// ==========================
-// STORAGE
-// ==========================
+// LOAD / SAVE
 function loadProgress() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) progress = JSON.parse(saved);
 }
-
 function saveProgress() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  updateStats();
 }
 
-// ==========================
 // INIT
-// ==========================
 async function init() {
-  try {
-    loadProgress();
-    const res = await fetch(DATA_URL);
-    if (!res.ok) throw new Error("Fetch failed");
-    vocab = await res.json();
+  loadProgress();
+  vocab = await fetch(DATA_URL).then(r => r.json());
 
-    vocab.forEach(v => {
-      if (!progress[v.lemma]) {
-        progress[v.lemma] = { level: 0, interval: 0, due: today() };
-      }
-    });
+  vocab.forEach(v => {
+    if (!progress[v.lemma]) {
+      progress[v.lemma] = {
+        level: 0,
+        interval: 0,
+        due: today(),
+        ef: 2.5,
+        repetitions: 0
+      };
+    }
+  });
 
-    document.getElementById("loading").classList.add("hidden");
-    updateStats();
-    nextCard();
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById("loading-text").innerText = "FAILED TO LOAD";
-  }
+  nextCard();
 }
 
-// ==========================
 // FILTERING
-// ==========================
 function filteredVocab() {
   return vocab.filter(v => v.frequency >= minFrequency);
 }
 
-function dueCards() {
-  return filteredVocab().filter(v => progress[v.lemma].due <= today());
-}
-
-// ==========================
-// CARD SELECTION
-// ==========================
+// STUDY MODE
 function nextCard() {
-  const available = filteredVocab();
-  if (!available.length) {
-    document.getElementById("greek-word").innerText = "No vocab found";
-    return;
-  }
-
-  const due = dueCards();
-  const pool = due.length ? due : available;
-
+  const pool = filteredVocab();
   current = pool[Math.floor(Math.random() * pool.length)];
-  render();
+  renderCard();
 }
 
-// ==========================
-// RENDER
-// ==========================
-function render() {
+function renderCard() {
   document.getElementById("greek-word").innerText = current.lemma;
   document.getElementById("definition").innerText = current.gloss;
   document.getElementById("word-tag").innerText = current.pos;
   document.getElementById("sentence").innerText = current.example;
   document.getElementById("ref").innerText = current.ref;
-
-  renderStars(progress[current.lemma].level);
-
   document.getElementById("answer").classList.add("hidden");
   document.getElementById("reveal-actions").classList.remove("hidden");
   document.getElementById("grade-actions").classList.add("hidden");
 }
 
-function renderStars(level) {
-  const c = document.getElementById("star-container");
-  c.innerHTML = "";
-  for (let i = 0; i < 5; i++) {
-    const dot = document.createElement("div");
-    dot.className =
-      "w-1.5 h-1.5 rounded-full " +
-      (i < level ? "bg-green-400" : "bg-slate-700");
-    c.appendChild(dot);
-  }
-}
-
-// ==========================
-// ACTIONS
-// ==========================
 function reveal() {
   document.getElementById("answer").classList.remove("hidden");
   document.getElementById("reveal-actions").classList.add("hidden");
@@ -233,44 +189,78 @@ function reveal() {
 
 function grade(correct) {
   const p = progress[current.lemma];
-  const intervals = [0, 1, 3, 7, 21, 60];
-
   if (correct) {
-    p.level = Math.min(p.level + 1, 5);
-    p.interval = intervals[p.level];
+    p.level = Math.min(5, p.level + 1);
+    p.repetitions++;
+    p.interval = Math.max(1, Math.round((p.interval || 1) * p.ef));
+    p.ef = Math.max(1.3, p.ef + 0.1);
   } else {
     p.level = 0;
+    p.repetitions = 0;
     p.interval = 1;
   }
-
   p.due = today() + p.interval * 86400000;
   saveProgress();
   nextCard();
 }
 
-// ==========================
-// STATS
-// ==========================
-function updateStats() {
-  const active = filteredVocab();
-  document.getElementById("total-count").innerText = active.length;
-  document.getElementById("mastered-count").innerText =
-    active.filter(v => progress[v.lemma].level === 5).length;
+// DASHBOARD
+function renderDashboard() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const sort = document.getElementById("sort").value;
+
+  let list = filteredVocab().filter(v =>
+    v.lemma.includes(q) || v.gloss.toLowerCase().includes(q)
+  );
+
+  list.sort((a, b) => {
+    const pa = progress[a.lemma];
+    const pb = progress[b.lemma];
+    if (sort === "frequency") return b.frequency - a.frequency;
+    if (sort === "level") return pb.level - pa.level;
+    if (sort === "due") return pa.due - pb.due;
+  });
+
+  document.getElementById("dashboard-table").innerHTML = list.map(v => {
+    const p = progress[v.lemma];
+    const status =
+      p.level === 5 ? "Mastered" :
+      p.due <= today() ? "Due" : "Learning";
+
+    return `
+      <tr class="border-b border-slate-800">
+        <td class="greek-text py-2">${v.lemma}</td>
+        <td>${v.gloss}</td>
+        <td>${v.frequency}</td>
+        <td>${p.level}</td>
+        <td>${new Date(p.due).toLocaleDateString()}</td>
+        <td>${p.ef.toFixed(2)}</td>
+        <td>${p.repetitions}</td>
+        <td class="text-xs">${status}</td>
+      </tr>`;
+  }).join("");
 }
 
-// ==========================
-// FREQUENCY SLIDER
-// ==========================
-const freqSlider = document.getElementById("freq-slider");
-const freqLabel = document.getElementById("freq-label");
+// VIEW SWITCHING
+function switchView(v) {
+  view = v;
+  document.getElementById("study-view").classList.toggle("hidden", v !== "study");
+  document.getElementById("dashboard-view").classList.toggle("hidden", v !== "dashboard");
+  document.getElementById("study-tab").classList.toggle("bg-blue-600", v === "study");
+  document.getElementById("dashboard-tab").classList.toggle("bg-blue-600", v === "dashboard");
+  if (v === "dashboard") renderDashboard();
+}
 
-freqSlider.addEventListener("input", () => {
-  minFrequency = parseInt(freqSlider.value);
-  freqLabel.innerText = minFrequency + "+"; // only one plus sign
-  updateStats();
-  nextCard();
+// EVENTS
+document.getElementById("search").addEventListener("input", renderDashboard);
+document.getElementById("sort").addEventListener("change", renderDashboard);
+
+document.getElementById("freq-slider").addEventListener("input", e => {
+  minFrequency = +e.target.value;
+  document.getElementById("freq-label").innerText = minFrequency + "+";
+  if (view === "dashboard") renderDashboard();
 });
-  
+
 init();
 </script>
 
