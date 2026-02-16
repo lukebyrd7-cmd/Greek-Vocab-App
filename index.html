@@ -13,107 +13,116 @@
 </style>
 </head>
 
-<body class="bg-slate-950 text-slate-200 min-h-screen p-4 flex justify-center">
+<body class="bg-slate-950 text-slate-200 min-h-screen flex justify-center p-4">
 
-<div class="w-full max-w-3xl bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-2xl">
+<div class="w-full max-w-4xl bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-2xl">
 
 <!-- HEADER -->
-<div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+<div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
   <div>
-    <h1 class="text-blue-400 font-bold text-lg">The Puritan Parser</h1>
+    <h1 class="text-emerald-400 font-bold text-lg">The Puritan Parser</h1>
     <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold">
-      GNT Fluency Engine
+      Greek New Testament Fluency Engine
     </p>
   </div>
 
   <div class="flex gap-2">
     <button onclick="switchView('study')" id="study-tab"
-      class="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold">
-      Study
+      class="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 bg-slate-800 text-slate-300">
+      📖 <span>Study</span>
     </button>
     <button onclick="switchView('dashboard')" id="dashboard-tab"
-      class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm font-bold">
-      Dashboard
+      class="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 bg-emerald-600 text-white">
+      📊 <span>Dashboard</span>
     </button>
   </div>
 </div>
 
-<!-- FREQUENCY SLIDER -->
-<div class="mb-4">
+<!-- FREQUENCY FILTER -->
+<div class="mb-6">
   <label class="text-xs text-slate-400 uppercase font-bold tracking-widest">
-    Min Frequency: <span id="freq-label">25+</span>
+    Minimum Frequency: <span id="freq-label">25+</span>
   </label>
-  <input id="freq-slider" type="range" min="1" max="50" value="25"
-    class="w-full mt-1">
+  <input id="freq-slider" type="range" min="1" max="50" value="25" class="w-full mt-2">
 </div>
 
-<!-- STUDY VIEW -->
-<div id="study-view">
+<!-- ================= STUDY VIEW ================= -->
+<div id="study-view" class="hidden">
 
-  <div class="text-center my-16">
-    <div id="word-tag" class="text-xs text-slate-500 uppercase tracking-widest mb-2">—</div>
-    <h2 id="greek-word" class="greek-text text-5xl font-bold mb-6">—</h2>
+<p class="text-center text-xs text-slate-500 uppercase tracking-widest mb-8">
+  Study Mode
+</p>
 
-    <div id="answer" class="hidden">
-      <p id="definition" class="text-2xl text-blue-300 italic mb-4"></p>
-      <p class="text-xs uppercase text-slate-500 font-bold mb-1">
-        Context <span id="ref"></span>
-      </p>
-      <p id="sentence" class="greek-text text-lg text-slate-300"></p>
-    </div>
-  </div>
+<div class="text-center my-16">
+  <div id="word-tag" class="text-xs text-slate-500 uppercase tracking-widest mb-2">—</div>
+  <h2 id="greek-word" class="greek-text text-5xl font-bold mb-6">—</h2>
 
-  <div id="reveal-actions">
-    <button onclick="reveal()"
-      class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">
-      Reveal
-    </button>
-  </div>
-
-  <div id="grade-actions" class="hidden grid grid-cols-2 gap-3">
-    <button onclick="grade(false)"
-      class="bg-slate-800 text-red-400 py-4 rounded-2xl">
-      Forgot
-    </button>
-    <button onclick="grade(true)"
-      class="bg-green-600 text-white py-4 rounded-2xl">
-      Knew It
-    </button>
+  <div id="answer" class="hidden">
+    <p id="definition" class="text-2xl text-emerald-300 italic mb-4"></p>
+    <p class="text-xs uppercase text-slate-500 font-bold mb-1">
+      Context <span id="ref"></span>
+    </p>
+    <p id="sentence" class="greek-text text-lg text-slate-300"></p>
   </div>
 </div>
 
-<!-- DASHBOARD VIEW -->
-<div id="dashboard-view" class="hidden">
+<div id="reveal-actions">
+  <button onclick="reveal()"
+    class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl">
+    Reveal
+  </button>
+</div>
 
-  <div class="flex gap-3 mb-4">
-    <input id="search"
-      placeholder="Search lemma or gloss…"
-      class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm">
-    <select id="sort"
-      class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm">
-      <option value="frequency">Frequency</option>
-      <option value="level">Mastery</option>
-      <option value="due">Due Date</option>
-    </select>
-  </div>
+<div id="grade-actions" class="hidden grid grid-cols-2 gap-3">
+  <button onclick="grade(false)"
+    class="bg-slate-800 text-red-400 py-4 rounded-2xl">
+    Forgot
+  </button>
+  <button onclick="grade(true)"
+    class="bg-emerald-600 text-white py-4 rounded-2xl">
+    Knew It
+  </button>
+</div>
 
-  <div class="overflow-auto max-h-[600px]">
-    <table class="w-full text-sm">
-      <thead class="sticky top-0 bg-slate-900">
-        <tr class="text-slate-400 text-xs uppercase">
-          <th class="text-left py-2">Lemma</th>
-          <th>Gloss</th>
-          <th>Freq</th>
-          <th>Level</th>
-          <th>Due</th>
-          <th>EF</th>
-          <th>Rep</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="dashboard-table"></tbody>
-    </table>
-  </div>
+</div>
+
+<!-- ================= DASHBOARD VIEW ================= -->
+<div id="dashboard-view">
+
+<p class="text-center text-xs text-slate-500 uppercase tracking-widest mb-6">
+  Vocabulary Dashboard
+</p>
+
+<div class="flex gap-3 mb-4">
+  <input id="search"
+    placeholder="Search lemma or gloss…"
+    class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm">
+  <select id="sort"
+    class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm">
+    <option value="frequency">Sort: Frequency</option>
+    <option value="level">Sort: Mastery</option>
+    <option value="due">Sort: Due Date</option>
+  </select>
+</div>
+
+<div class="overflow-auto max-h-[600px] rounded-xl border border-slate-800">
+<table class="w-full text-sm">
+<thead class="sticky top-0 bg-slate-900">
+<tr class="text-slate-400 text-xs uppercase">
+  <th class="text-left px-3 py-2">Lemma</th>
+  <th>Gloss</th>
+  <th>Freq</th>
+  <th>Level</th>
+  <th>Due</th>
+  <th>EF</th>
+  <th>Rep</th>
+  <th>Status</th>
+</tr>
+</thead>
+<tbody id="dashboard-table"></tbody>
+</table>
+</div>
+
 </div>
 
 </div>
@@ -121,15 +130,16 @@
 <script>
 const DATA_URL = "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/main/vocab.json";
 const STORAGE_KEY = "puritan-parser-progress";
-let minFrequency = 25;
+
 let vocab = [];
 let progress = {};
 let current = null;
-let view = "study";
+let minFrequency = 25;
 
+// ---------- UTIL ----------
 const today = () => Date.now();
 
-// LOAD / SAVE
+// ---------- STORAGE ----------
 function loadProgress() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) progress = JSON.parse(saved);
@@ -138,7 +148,7 @@ function saveProgress() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
 }
 
-// INIT
+// ---------- INIT ----------
 async function init() {
   loadProgress();
   vocab = await fetch(DATA_URL).then(r => r.json());
@@ -147,7 +157,7 @@ async function init() {
     if (!progress[v.lemma]) {
       progress[v.lemma] = {
         level: 0,
-        interval: 0,
+        interval: 1,
         due: today(),
         ef: 2.5,
         repetitions: 0
@@ -155,15 +165,15 @@ async function init() {
     }
   });
 
-  nextCard();
+  renderDashboard();   // dashboard is default
 }
 
-// FILTERING
+// ---------- FILTER ----------
 function filteredVocab() {
   return vocab.filter(v => v.frequency >= minFrequency);
 }
 
-// STUDY MODE
+// ---------- STUDY ----------
 function nextCard() {
   const pool = filteredVocab();
   current = pool[Math.floor(Math.random() * pool.length)];
@@ -176,6 +186,7 @@ function renderCard() {
   document.getElementById("word-tag").innerText = current.pos;
   document.getElementById("sentence").innerText = current.example;
   document.getElementById("ref").innerText = current.ref;
+
   document.getElementById("answer").classList.add("hidden");
   document.getElementById("reveal-actions").classList.remove("hidden");
   document.getElementById("grade-actions").classList.add("hidden");
@@ -192,7 +203,7 @@ function grade(correct) {
   if (correct) {
     p.level = Math.min(5, p.level + 1);
     p.repetitions++;
-    p.interval = Math.max(1, Math.round((p.interval || 1) * p.ef));
+    p.interval = Math.round(p.interval * p.ef);
     p.ef = Math.max(1.3, p.ef + 0.1);
   } else {
     p.level = 0;
@@ -204,7 +215,7 @@ function grade(correct) {
   nextCard();
 }
 
-// DASHBOARD
+// ---------- DASHBOARD ----------
 function renderDashboard() {
   const q = document.getElementById("search").value.toLowerCase();
   const sort = document.getElementById("sort").value;
@@ -228,37 +239,44 @@ function renderDashboard() {
       p.due <= today() ? "Due" : "Learning";
 
     return `
-      <tr class="border-b border-slate-800">
-        <td class="greek-text py-2">${v.lemma}</td>
-        <td>${v.gloss}</td>
-        <td>${v.frequency}</td>
-        <td>${p.level}</td>
-        <td>${new Date(p.due).toLocaleDateString()}</td>
-        <td>${p.ef.toFixed(2)}</td>
-        <td>${p.repetitions}</td>
-        <td class="text-xs">${status}</td>
-      </tr>`;
+    <tr class="border-b border-slate-800">
+      <td class="px-3 py-2 greek-text">${v.lemma}</td>
+      <td>${v.gloss}</td>
+      <td>${v.frequency}</td>
+      <td>${p.level}</td>
+      <td>${new Date(p.due).toLocaleDateString()}</td>
+      <td>${p.ef.toFixed(2)}</td>
+      <td>${p.repetitions}</td>
+      <td class="text-xs">${status}</td>
+    </tr>`;
   }).join("");
 }
 
-// VIEW SWITCHING
+// ---------- VIEW SWITCH ----------
 function switchView(v) {
-  view = v;
   document.getElementById("study-view").classList.toggle("hidden", v !== "study");
   document.getElementById("dashboard-view").classList.toggle("hidden", v !== "dashboard");
-  document.getElementById("study-tab").classList.toggle("bg-blue-600", v === "study");
-  document.getElementById("dashboard-tab").classList.toggle("bg-blue-600", v === "dashboard");
+
+  document.getElementById("study-tab").classList.toggle("bg-emerald-600", v === "study");
+  document.getElementById("study-tab").classList.toggle("text-white", v === "study");
+  document.getElementById("study-tab").classList.toggle("bg-slate-800", v !== "study");
+
+  document.getElementById("dashboard-tab").classList.toggle("bg-emerald-600", v === "dashboard");
+  document.getElementById("dashboard-tab").classList.toggle("text-white", v === "dashboard");
+  document.getElementById("dashboard-tab").classList.toggle("bg-slate-800", v !== "dashboard");
+
+  if (v === "study") nextCard();
   if (v === "dashboard") renderDashboard();
 }
 
-// EVENTS
+// ---------- EVENTS ----------
 document.getElementById("search").addEventListener("input", renderDashboard);
 document.getElementById("sort").addEventListener("change", renderDashboard);
 
 document.getElementById("freq-slider").addEventListener("input", e => {
   minFrequency = +e.target.value;
   document.getElementById("freq-label").innerText = minFrequency + "+";
-  if (view === "dashboard") renderDashboard();
+  renderDashboard();
 });
 
 init();
