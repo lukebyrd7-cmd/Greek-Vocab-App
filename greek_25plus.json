@@ -1,0 +1,22 @@
+[
+  {"word":"θεός","lemma":"θεός","gloss":"god, God","pos":"", "freq":1317},
+  {"word":"κύριος_2","lemma":"κύριος","gloss":"lord, master, the Lord","pos":"", "freq":717},
+  {"word":"ἄνθρωπος","lemma":"ἄνθρωπος","gloss":"man, human","pos":"", "freq":550},
+  {"word":"Χριστός","lemma":"Χριστός","gloss":"Christ","pos":"", "freq":529},
+  {"word":"πατήρ","lemma":"πατήρ","gloss":"father, Father","pos":"", "freq":413},
+  {"word":"ἡµέρα","lemma":"ἡµέρα","gloss":"day, lifetime, time period","pos":"", "freq":389},
+  {"word":"πνεῦµα","lemma":"πνεῦµα","gloss":"wind; breath; spirit, Spirit","pos":"", "freq":379},
+  {"word":"υἱός","lemma":"υἱός","gloss":"son","pos":"", "freq":377},
+  {"word":"ἀδελφός","lemma":"ἀδελφός","gloss":"brother","pos":"", "freq":343},
+  {"word":"λόγος","lemma":"λόγος","gloss":"word, speech, message; book, volume","pos":"", "freq":330},
+  {"word":"οὐρανός","lemma":"οὐρανός","gloss":"heaven","pos":"", "freq":273},
+  {"word":"µαθητής","lemma":"µαθητής","gloss":"disciple, student","pos":"", "freq":261},
+  {"word":"γῆ","lemma":"γῆ","gloss":"earth, land","pos":"", "freq":250},
+  {"word":"πίστις","lemma":"πίστις","gloss":"faith, belief, trust; value","pos":"", "freq":243},
+  {"word":"ὄνοµα","lemma":"ὄνοµα","gloss":"name","pos":"", "freq":231},
+  {"word":"ἀνήρ","lemma":"ἀνήρ","gloss":"man, husband","pos":"", "freq":216},
+  {"word":"γυνή","lemma":"γυνή","gloss":"woman, wife","pos":"", "freq":215},
+  {"word":"νόµος","lemma":"νόµος","gloss":"law, principle","pos":"", "freq":194},
+  {"word":"κόσµος","lemma":"κόσµος","gloss":"world, mankind, earth; adornment, decoration","pos":"", "freq":186},
+  {"word":"χείρ","lemma":"χείρ","gloss":"hand","pos":"", "freq":177}
+]
