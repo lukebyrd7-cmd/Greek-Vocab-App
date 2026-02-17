@@ -3,35 +3,59 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Biblical Vocab Trainer — Greek & Hebrew</title>
+<title>Puritan Parser — Greek & Hebrew</title>
 <style>
+  /* ---------- core color tokens (light default) ---------- */
   :root{
-    --accent: #4e8f6e; /* neutral green accent — change if you want */
+    --accent: #4e8f6e; /* default neutral green */
     --bg: #fbfdfb;
     --card: #ffffff;
     --muted: #666;
+    --text: #111;
+    --border: rgba(0,0,0,0.06);
     --radius: 10px;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   }
+
+  /* ---------- system-level dark colors (used when prefers-color-scheme: dark or .dark class) ---------- */
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg: #0f1720;
+      --card: #0b1216;
+      --muted: #9aa4ab;
+      --text: #e6eef2;
+      --border: rgba(255,255,255,0.04);
+    }
+  }
+  /* forced dark class (takes precedence) */
+  .dark{
+    --bg: #0f1720;
+    --card: #0b1216;
+    --muted: #9aa4ab;
+    --text: #e6eef2;
+    --border: rgba(255,255,255,0.04);
+  }
+
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:#111;line-height:1.35;padding:18px}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.35;padding:18px}
   header{display:flex;align-items:center;gap:16px;margin-bottom:14px}
-  .logo{width:44px;height:44px;border-radius:9px;background:linear-gradient(180deg, #fff 0%, rgba(0,0,0,0.02) 100%);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);border:2px solid rgba(0,0,0,0.06)}
+  .logo{width:44px;height:44px;border-radius:9px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);border:2px solid var(--border)}
   h1{font-size:18px;margin:0}
+  .subtitle{font-size:13px;color:var(--muted)}
   .tabs{display:flex;gap:8px;margin:12px 0}
-  .tab{padding:8px 12px;border-radius:8px;background:transparent;border:1px solid transparent;cursor:pointer}
-  .tab.active{background:var(--accent);color:white;border-color:rgba(0,0,0,0.06)}
+  .tab{padding:8px 12px;border-radius:8px;background:transparent;border:1px solid transparent;cursor:pointer;color:var(--text)}
+  .tab.active{background:var(--accent);color:white;border-color:var(--border)}
   .grid{display:grid;grid-template-columns:1fr 360px;gap:14px}
   .panel{background:var(--card);padding:14px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,0.04)}
   .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .controls .search{flex:1;min-width:160px}
-  input[type="text"], select {width:100%;padding:8px;border-radius:8px;border:1px solid #ddd}
+  input[type="text"], select, input[type="color"] {width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;background:transparent;color:var(--text)}
   label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   table{width:100%;border-collapse:collapse;font-size:14px}
-  th,td{padding:8px;border-bottom:1px solid #f0f0f0;text-align:left}
+  th,td{padding:8px;border-bottom:1px solid rgba(0,0,0,0.04);text-align:left}
   th{font-weight:600;font-size:13px;color:var(--muted)}
   .btn{background:var(--accent);color:white;padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
-  .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--border)}
   .small{font-size:13px;padding:6px 8px;border-radius:8px}
   .muted{color:var(--muted);font-size:13px}
   .row{display:flex;gap:8px;align-items:center}
@@ -39,9 +63,15 @@
   input[type="range"]{width:160px}
   .flashcard{display:flex;flex-direction:column;align-items:center;justify-content:center;height:220px}
   .card-word{font-size:34px;font-weight:700;margin-bottom:8px}
-  .card-info{font-size:15px;color:var(--muted)}
-  .tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#f7fdf7;border:1px solid rgba(0,0,0,0.03);font-size:12px;color:var(--muted)}
+  .card-info{font-size:15px;color:var(--muted);white-space:pre-wrap;text-align:center}
+  .tag{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,0.02);border:1px solid var(--border);font-size:12px;color:var(--muted)}
   footer{margin-top:16px;color:var(--muted);font-size:13px}
+  .accent-picker{display:flex;gap:8px;flex-wrap:wrap}
+  .color-btn{width:36px;height:36px;border-radius:8px;border:2px solid transparent;cursor:pointer;display:inline-block}
+  .color-btn.selected{outline:3px solid rgba(0,0,0,0.08);transform:translateY(-2px)}
+  .theme-buttons{display:flex;gap:8px;align-items:center}
+  .theme-btn{padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer}
+  .theme-btn.active{background:var(--accent);color:#fff;border-color:var(--border)}
   @media (max-width:900px){
     .grid{grid-template-columns:1fr; }
     .panel{padding:10px}
@@ -50,10 +80,10 @@
 </head>
 <body>
 <header>
-  <div class="logo">BV</div>
+  <div class="logo" id="logo">PP</div>
   <div>
-    <h1>Biblical Vocab Trainer</h1>
-    <div class="muted">Greek (GNT) and Biblical Hebrew — unified app</div>
+    <h1>Puritan Parser</h1>
+    <div class="subtitle">Greek (GNT) and Biblical Hebrew — unified study tools</div>
   </div>
 </header>
 
@@ -132,7 +162,7 @@
 
     <!-- Quiz area -->
     <section id="quizSection" style="display:none;margin-top:14px">
-      <div style="padding:12px;border-radius:10px;background:#fbfffbf0;border:1px solid rgba(0,0,0,0.02)">
+      <div style="padding:12px;border-radius:10px;background:rgba(251,255,251,0.6);border:1px solid var(--border)">
         <div id="quizQuestion" style="font-weight:700;font-size:18px;margin-bottom:8px">What is the gloss for: <span id="quizWord"></span> ?</div>
         <div id="quizChoices" style="display:flex;flex-direction:column;gap:8px"></div>
         <div style="display:flex;justify-content:space-between;margin-top:10px">
@@ -164,12 +194,24 @@
       </div>
 
       <div>
-        <label class="small">Theme</label>
-        <div style="display:flex;gap:8px">
-          <button class="btn small" id="themeReset">Reset Green</button>
-          <button class="btn ghost small" id="chooseAccent">Change Accent</button>
+        <label class="small">Accent color</label>
+        <div class="accent-picker" id="accentPicker">
+          <!-- color buttons are created by JS at init -->
         </div>
-        <div class="muted" style="margin-top:6px">To change color edit <code>--accent</code> in CSS or use Change Accent.</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="customColor" placeholder="#rrggbb" type="text" style="flex:1" />
+          <button class="btn small" id="applyCustom">Apply</button>
+        </div>
+      </div>
+
+      <div>
+        <label class="small">Theme (Light / Dark / System)</label>
+        <div class="theme-buttons" id="themeButtons">
+          <button class="theme-btn" data-theme="light">Light</button>
+          <button class="theme-btn" data-theme="dark">Dark</button>
+          <button class="theme-btn" data-theme="system">System</button>
+        </div>
+        <div class="muted" style="margin-top:6px">System follows your OS preference. Dark forces dark colors.</div>
       </div>
 
       <div>
@@ -189,12 +231,12 @@
 </div>
 
 <footer>
-  Built for Biblical Greek & Hebrew study — paste your CSV (word,lemma,gloss,pos,freq). Contact me for adaptation.
+  Puritan Parser — Greek & Hebrew practice. Data stored locally.
 </footer>
 
 <script>
 /* =========================
-   In-memory sample data
+   sample data (unchanged)
    ========================= */
 const SAMPLE_GREEK = [
   {word:"λόγος", lemma:"λόγος", gloss:"word, message", pos:"noun", freq:256},
@@ -210,19 +252,19 @@ const SAMPLE_HEBREW = [
 ];
 
 /* =========================
-   App state & helpers
+   app state & keys
    ========================= */
 let state = {
-  lang: 'greek', // 'greek' or 'hebrew'
+  lang: 'greek',
   data: { greek: [], hebrew: [] },
   filtered: [],
-  mode: 'list', // list | flash | quiz
+  mode: 'list',
   flashQueue: [],
   flashIndex: 0,
   quiz: {score:0, remaining:[]}
 };
-
 const LS_KEYS = { greek: 'vocab_greek', hebrew: 'vocab_hebrew' };
+const PREF_KEYS = { accent: 'vocab_accent', theme: 'vocab_theme' };
 
 /* =========================
    DOM refs
@@ -248,7 +290,6 @@ const flashProgress = document.getElementById('flashProgress');
 const exitFlash = document.getElementById('exitFlash');
 
 const quizSection = document.getElementById('quizSection');
-const quizQuestion = document.getElementById('quizQuestion');
 const quizWord = document.getElementById('quizWord');
 const quizChoices = document.getElementById('quizChoices');
 const quizScore = document.getElementById('quizScore');
@@ -258,11 +299,13 @@ const importFile = document.getElementById('importFile');
 const exportBtn = document.getElementById('exportBtn');
 const downloadSample = document.getElementById('downloadSample');
 const resetBtn = document.getElementById('resetBtn');
-const themeReset = document.getElementById('themeReset');
-const chooseAccent = document.getElementById('chooseAccent');
+const accentPicker = document.getElementById('accentPicker');
+const customColor = document.getElementById('customColor');
+const applyCustom = document.getElementById('applyCustom');
+const themeButtons = document.getElementById('themeButtons');
 
 /* =========================
-   Init: load from localStorage or sample
+   load data & prefs
    ========================= */
 function loadData(){
   try {
@@ -276,26 +319,108 @@ function loadData(){
     state.data.hebrew = SAMPLE_HEBREW.slice();
   }
 }
+function loadPrefs(){
+  const acc = localStorage.getItem(PREF_KEYS.accent);
+  if(acc) document.documentElement.style.setProperty('--accent', acc);
+  const theme = localStorage.getItem(PREF_KEYS.theme) || 'system';
+  applyTheme(theme, false);
+}
 loadData();
+loadPrefs();
 
 /* =========================
-   Render helpers
+   Accent palette (options)
+   ========================= */
+const ACCENT_OPTIONS = [
+  {name:'Green', color:'#4e8f6e'},
+  {name:'Deep Blue', color:'#246b9c'},
+  {name:'Teal', color:'#2a9d8f'},
+  {name:'Maroon', color:'#8a2b2b'},
+  {name:'Amber', color:'#d97706'},
+  {name:'Slate', color:'#475569'}
+];
+
+function renderAccentButtons(){
+  accentPicker.innerHTML = '';
+  const current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  ACCENT_OPTIONS.forEach(opt=>{
+    const b = document.createElement('button');
+    b.className = 'color-btn';
+    b.title = opt.name;
+    b.style.background = opt.color;
+    b.dataset.color = opt.color;
+    if(opt.color.toLowerCase() === current.toLowerCase()) b.classList.add('selected');
+    b.addEventListener('click', ()=> {
+      setAccent(opt.color);
+      // update selection visuals
+      document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');
+    });
+    accentPicker.appendChild(b);
+  });
+}
+renderAccentButtons();
+
+function setAccent(hex){
+  document.documentElement.style.setProperty('--accent', hex);
+  localStorage.setItem(PREF_KEYS.accent, hex);
+  // ensure tab and ghost buttons picking up new accent colors immediately (no further action needed)
+}
+
+/* custom color input */
+applyCustom.addEventListener('click', ()=>{
+  const val = (customColor.value || '').trim();
+  if(!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(val)){ alert('Enter a valid hex color like #3b7a57'); return; }
+  setAccent(val);
+  // clear selection visuals (none of the preset buttons will match)
+  document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('selected'));
+});
+
+/* =========================
+   Theme selection (light/dark/system)
+   ========================= */
+function applyTheme(theme, persist=true){
+  // theme: 'light' | 'dark' | 'system'
+  if(theme === 'dark'){
+    document.documentElement.classList.add('dark');
+  } else if(theme === 'light'){
+    document.documentElement.classList.remove('dark');
+  } else { // system
+    document.documentElement.classList.remove('dark'); // allow media query to decide
+  }
+  // update buttons UI
+  document.querySelectorAll('.theme-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.theme === theme);
+  });
+  if(persist) localStorage.setItem(PREF_KEYS.theme, theme);
+}
+themeButtons.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.theme-btn');
+  if(!btn) return;
+  const theme = btn.dataset.theme;
+  applyTheme(theme, true);
+});
+
+/* mark initial active theme button on load */
+(function markInitialTheme(){
+  const t = localStorage.getItem(PREF_KEYS.theme) || 'system';
+  applyTheme(t, false);
+})();
+
+/* =========================
+   Render / helpers
    ========================= */
 function setLang(lang){
   state.lang = lang;
   tabs.forEach(t=>t.classList.toggle('active', t.dataset.lang===lang));
   langTag.textContent = lang === 'greek' ? 'Greek' : 'Hebrew';
-  // update UI mode
   renderList();
   showMode('list');
 }
 
-function getCurrentList(){
-  return state.data[state.lang] || [];
-}
+function getCurrentList(){ return state.data[state.lang] || []; }
 
 function renderList(){
-  // apply filters
   const q = (searchInput.value || '').trim().toLowerCase();
   const minFreq = Number(freqSlider.value) || 1;
   let list = getCurrentList().filter(it=>{
@@ -305,7 +430,6 @@ function renderList(){
     return matchesFreq && combined.includes(q);
   });
 
-  // sort
   const sort = sortSelect.value;
   list.sort((a,b)=>{
     if(sort==='freq-desc') return b.freq - a.freq;
@@ -318,7 +442,6 @@ function renderList(){
   state.filtered = list;
   entriesCount.textContent = `${list.length} entries`;
 
-  // render rows
   wordsTableBody.innerHTML = '';
   for(const row of list){
     const tr = document.createElement('tr');
@@ -330,36 +453,24 @@ function renderList(){
     wordsTableBody.appendChild(tr);
   }
 }
-
 function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 /* =========================
-   Slider UI behavior
+   UI events
    ========================= */
 freqSlider.addEventListener('input', () => {
   let v = Number(freqSlider.value);
   freqLabel.textContent = (v >= 50) ? '50+' : `${v}+`;
   renderList();
 });
-
-/* =========================
-   Search & sort
-   ========================= */
 searchInput.addEventListener('input', debounce(()=>renderList(), 150));
 sortSelect.addEventListener('change', ()=>renderList());
-
-/* =========================
-   Tabs
-   ========================= */
-tabs.forEach(t=>{
-  t.addEventListener('click', ()=> setLang(t.dataset.lang));
-});
+tabs.forEach(t=> t.addEventListener('click', ()=> setLang(t.dataset.lang)));
 
 /* =========================
    Flashcards
    ========================= */
 flashBtn.addEventListener('click', () => {
-  // prepare queue from filtered (or all if none)
   const source = state.filtered.length ? state.filtered.slice() : getCurrentList().slice();
   if(!source.length){ alert('No entries to practice. Import or reduce min frequency.'); return; }
   state.flashQueue = shuffle(source);
@@ -367,7 +478,6 @@ flashBtn.addEventListener('click', () => {
   showMode('flash');
   renderFlash();
 });
-
 function renderFlash(){
   const q = state.flashQueue;
   if(!q.length){ flashWord.textContent='—'; flashDetail.textContent='No cards'; flashProgress.textContent='0 / 0'; return; }
@@ -377,31 +487,25 @@ function renderFlash(){
   flashProgress.textContent = `${state.flashIndex+1} / ${q.length}`;
   revealBtn.textContent = 'Reveal';
 }
-
 revealBtn.addEventListener('click', () => {
   const cur = state.flashQueue[state.flashIndex];
   if(!cur) return;
   flashDetail.textContent = `${cur.lemma || ''} • ${cur.pos || ''} • freq ${cur.freq || 0}\nGloss: ${cur.gloss || ''}`;
-  revealBtn.textContent = 'Hide';
+  revealBtn.textContent = revealBtn.textContent === 'Reveal' ? 'Hide' : 'Reveal';
 });
-
 markKnown.addEventListener('click', () => {
-  // simple behaviour: remove current card from queue
   state.flashQueue.splice(state.flashIndex,1);
   if(state.flashIndex >= state.flashQueue.length) state.flashIndex = Math.max(0, state.flashQueue.length-1);
   if(!state.flashQueue.length){ alert('Done! All cards in this session completed.'); showMode('list'); renderList(); return; }
   renderFlash();
 });
-
 markAgain.addEventListener('click', () => {
-  // push current card to the end and advance
   const cur = state.flashQueue[state.flashIndex];
   state.flashQueue.splice(state.flashIndex,1);
   state.flashQueue.push(cur);
   if(state.flashIndex >= state.flashQueue.length) state.flashIndex = Math.max(0, state.flashQueue.length-1);
   renderFlash();
 });
-
 exitFlash.addEventListener('click', ()=> showMode('list'));
 
 /* =========================
@@ -411,18 +515,16 @@ quizBtn.addEventListener('click', () => {
   const source = state.filtered.length ? state.filtered.slice() : getCurrentList().slice();
   if(source.length < 4){ alert('Need at least 4 items to make a multiple-choice quiz.'); return; }
   state.quiz.score = 0;
-  state.quiz.remaining = shuffle(source).slice(); // will pop
+  state.quiz.remaining = shuffle(source).slice();
   showMode('quiz');
   renderQuizQuestion();
 });
-
 function renderQuizQuestion(){
   const rem = state.quiz.remaining;
   if(!rem.length){ alert(`Quiz finished — score ${state.quiz.score}`); showMode('list'); return; }
   const correct = rem.pop();
   quizWord.textContent = correct.word;
   quizScore.textContent = `Score: ${state.quiz.score}`;
-  // create choices: correct gloss + 3 random distractors
   const pool = getCurrentList().filter(x => x !== correct);
   const distractors = shuffle(pool).slice(0,3).map(d=>d.gloss);
   const choices = shuffle([correct.gloss, ...distractors]);
@@ -439,7 +541,6 @@ function renderQuizQuestion(){
     quizChoices.appendChild(btn);
   });
 }
-
 exitQuiz.addEventListener('click', ()=> showMode('list'));
 
 /* =========================
@@ -453,7 +554,7 @@ function showMode(m){
 }
 
 /* =========================
-   Import / Export
+   Import / Export / Reset
    ========================= */
 importFile.addEventListener('change', (e)=>{
   const f = e.target.files[0];
@@ -468,7 +569,6 @@ importFile.addEventListener('change', (e)=>{
       } else {
         parsed = csvToObjects(text);
       }
-      // normalize and write to current language
       const normalized = parsed.map(r => ({
         word: r.word || r.surface || r.form || '',
         lemma: r.lemma||'',
@@ -489,7 +589,6 @@ importFile.addEventListener('change', (e)=>{
   };
   reader.readAsText(f);
 });
-
 exportBtn.addEventListener('click', ()=>{
   const data = state.data[state.lang] || [];
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
@@ -500,7 +599,6 @@ exportBtn.addEventListener('click', ()=>{
   a.click();
   URL.revokeObjectURL(url);
 });
-
 downloadSample.addEventListener('click', ()=>{
   const sample = state.lang === 'greek' ? SAMPLE_GREEK : SAMPLE_HEBREW;
   const blob = new Blob([JSON.stringify(sample, null, 2)], {type:'application/json'});
@@ -509,28 +607,12 @@ downloadSample.addEventListener('click', ()=>{
   a.download = `${state.lang}_sample.json`;
   a.click();
 });
-
 resetBtn.addEventListener('click', () => {
   if(!confirm('Reset current language to sample data? This will overwrite local saved data for this language.')) return;
   const data = state.lang === 'greek' ? SAMPLE_GREEK.slice() : SAMPLE_HEBREW.slice();
   state.data[state.lang] = data;
   localStorage.setItem(LS_KEYS[state.lang], JSON.stringify(data));
   renderList();
-});
-
-/* =========================
-   Theme controls
-   ========================= */
-themeReset.addEventListener('click', ()=>{
-  document.documentElement.style.setProperty('--accent', '#4e8f6e');
-});
-chooseAccent.addEventListener('click', ()=>{
-  const val = prompt('Enter a hex color (example: #3b7a57) for the accent:','');
-  if(val && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(val)){
-    document.documentElement.style.setProperty('--accent', val);
-  } else if(val){
-    alert('Invalid hex color. Example valid format: #3b7a57');
-  }
 });
 
 /* =========================
@@ -544,12 +626,10 @@ function shuffle(a){ return a.slice().sort(()=>Math.random()-0.5); }
 
 /* CSV parser (simple) */
 function csvToObjects(text){
-  // handles basic CSV with header line
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.trim()!=='');
   if(!lines.length) return [];
   const header = lines.shift().split(',').map(h=>h.trim());
   return lines.map(line => {
-    // handle quoted fields rudimentarily
     const parts = [];
     let cur = '', inQ = false;
     for(let i=0;i<line.length;i++){
@@ -567,17 +647,27 @@ function csvToObjects(text){
   });
 }
 
-/* small helper to ensure UI initial state */
-setLang('greek');
-renderList();
-
-/* keyboard shortcuts (optional) */
+/* keyboard shortcuts */
 document.addEventListener('keydown', e=>{
   if(e.key === 'f' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); flashBtn.click(); }
 });
 
-/* Accessibility / safe defaults */
+/* accessibility roles */
 document.querySelectorAll('button').forEach(b=>b.setAttribute('role','button'));
+
+/* initialize UI */
+setLang('greek');
+renderList();
+(function markAccentSelection(){
+  // ensure one of the preset buttons is visually selected on load
+  const current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  document.querySelectorAll('.color-btn').forEach(b=>{
+    if(b.dataset.color && b.dataset.color.toLowerCase() === current.toLowerCase()){
+      b.classList.add('selected');
+    }
+  });
+})();
+
 </script>
 </body>
 </html>
