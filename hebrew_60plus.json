@@ -1,0 +1,22 @@
+[
+  {"word":"אמר","lemma":"אמר","gloss":"to say","pos":"verb","freq":5317},
+  {"word":"היה","lemma":"היה","gloss":"to be","pos":"verb","freq":3576},
+  {"word":"עשה","lemma":"עשה","gloss":"to do, make","pos":"verb","freq":2632},
+  {"word":"בוא","lemma":"בוא","gloss":"to come","pos":"verb","freq":2579},
+  {"word":"נתן","lemma":"נתן","gloss":"to give, put, set","pos":"verb","freq":2014},
+  {"word":"הלך","lemma":"הלך","gloss":"to walk, go","pos":"verb","freq":1554},
+  {"word":"רא״ה","lemma":"ראה","gloss":"to see","pos":"verb","freq":1310},
+  {"word":"שמע","lemma":"שמע","gloss":"to hear","pos":"verb","freq":1165},
+  {"word":"דבר","lemma":"דבר","gloss":"to speak / word","pos":"verb/noun","freq":1135},
+  {"word":"ישב","lemma":"ישב","gloss":"to sit, dwell","pos":"verb","freq":1087},
+  {"word":"יצא","lemma":"יצא","gloss":"to go out","pos":"verb","freq":1075},
+  {"word":"שוב","lemma":"שוב","gloss":"to return","pos":"verb","freq":1075},
+  {"word":"לקח","lemma":"לקח","gloss":"to take","pos":"verb","freq":966},
+  {"word":"ידע","lemma":"ידע","gloss":"to know","pos":"verb","freq":952},
+  {"word":"עלה","lemma":"עלה","gloss":"to go up","pos":"verb","freq":894},
+  {"word":"שלח","lemma":"שלח","gloss":"to send","pos":"verb","freq":847},
+  {"word":"מות","lemma":"מות","gloss":"to die","pos":"verb","freq":845},
+  {"word":"אכל","lemma":"אכל","gloss":"to eat","pos":"verb","freq":814},
+  {"word":"קרא","lemma":"קרא","gloss":"to call","pos":"verb","freq":736},
+  {"word":"נשא","lemma":"נשא","gloss":"to lift, carry, take","pos":"verb","freq":658}
+]
