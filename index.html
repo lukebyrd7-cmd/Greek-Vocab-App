@@ -3,671 +3,164 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Puritan Parser — Greek & Hebrew</title>
+<title>Puritan Parser</title>
+
 <style>
-  /* ---------- core color tokens (light default) ---------- */
-  :root{
-    --accent: #4e8f6e; /* default neutral green */
-    --bg: #fbfdfb;
-    --card: #ffffff;
-    --muted: #666;
-    --text: #111;
-    --border: rgba(0,0,0,0.06);
-    --radius: 10px;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  }
-
-  /* ---------- system-level dark colors (used when prefers-color-scheme: dark or .dark class) ---------- */
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg: #0f1720;
-      --card: #0b1216;
-      --muted: #9aa4ab;
-      --text: #e6eef2;
-      --border: rgba(255,255,255,0.04);
-    }
-  }
-  /* forced dark class (takes precedence) */
-  .dark{
-    --bg: #0f1720;
-    --card: #0b1216;
-    --muted: #9aa4ab;
-    --text: #e6eef2;
-    --border: rgba(255,255,255,0.04);
-  }
-
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);line-height:1.35;padding:18px}
-  header{display:flex;align-items:center;gap:16px;margin-bottom:14px}
-  .logo{width:44px;height:44px;border-radius:9px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);border:2px solid var(--border)}
-  h1{font-size:18px;margin:0}
-  .subtitle{font-size:13px;color:var(--muted)}
-  .tabs{display:flex;gap:8px;margin:12px 0}
-  .tab{padding:8px 12px;border-radius:8px;background:transparent;border:1px solid transparent;cursor:pointer;color:var(--text)}
-  .tab.active{background:var(--accent);color:white;border-color:var(--border)}
-  .grid{display:grid;grid-template-columns:1fr 360px;gap:14px}
-  .panel{background:var(--card);padding:14px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,0.04)}
-  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .controls .search{flex:1;min-width:160px}
-  input[type="text"], select, input[type="color"] {width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;background:transparent;color:var(--text)}
-  label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  th,td{padding:8px;border-bottom:1px solid rgba(0,0,0,0.04);text-align:left}
-  th{font-weight:600;font-size:13px;color:var(--muted)}
-  .btn{background:var(--accent);color:white;padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
-  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--border)}
-  .small{font-size:13px;padding:6px 8px;border-radius:8px}
-  .muted{color:var(--muted);font-size:13px}
-  .row{display:flex;gap:8px;align-items:center}
-  .slider-row{display:flex;align-items:center;gap:12px}
-  input[type="range"]{width:160px}
-  .flashcard{display:flex;flex-direction:column;align-items:center;justify-content:center;height:220px}
-  .card-word{font-size:34px;font-weight:700;margin-bottom:8px}
-  .card-info{font-size:15px;color:var(--muted);white-space:pre-wrap;text-align:center}
-  .tag{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,0.02);border:1px solid var(--border);font-size:12px;color:var(--muted)}
-  footer{margin-top:16px;color:var(--muted);font-size:13px}
-  .accent-picker{display:flex;gap:8px;flex-wrap:wrap}
-  .color-btn{width:36px;height:36px;border-radius:8px;border:2px solid transparent;cursor:pointer;display:inline-block}
-  .color-btn.selected{outline:3px solid rgba(0,0,0,0.08);transform:translateY(-2px)}
-  .theme-buttons{display:flex;gap:8px;align-items:center}
-  .theme-btn{padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer}
-  .theme-btn.active{background:var(--accent);color:#fff;border-color:var(--border)}
-  @media (max-width:900px){
-    .grid{grid-template-columns:1fr; }
-    .panel{padding:10px}
-  }
+:root{
+  --accent:#4e8f6e;
+  --bg:#fbfdfb;
+  --card:#ffffff;
+  --muted:#666;
+  --text:#111;
+  --border:rgba(0,0,0,0.06);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+}
+.dark{
+  --bg:#0f1720;
+  --card:#0b1216;
+  --muted:#9aa4ab;
+  --text:#e6eef2;
+  --border:rgba(255,255,255,0.06);
+}
+body{margin:0;background:var(--bg);color:var(--text);padding:18px}
+header{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.logo{width:44px;height:44px;border-radius:8px;
+display:flex;align-items:center;justify-content:center;
+font-weight:700;color:var(--accent);border:2px solid var(--border)}
+.tabs{display:flex;gap:8px;margin:12px 0}
+.tab{padding:8px 12px;border-radius:8px;border:1px solid var(--border);
+background:transparent;color:var(--text);cursor:pointer}
+.tab.active{background:var(--accent);color:#fff}
+.panel{background:var(--card);padding:14px;border-radius:10px}
+.btn{background:var(--accent);color:#fff;border:none;
+padding:6px 10px;border-radius:8px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);
+border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px;border-bottom:1px solid var(--border)}
+input,select{padding:6px;border-radius:6px;border:1px solid var(--border);
+background:transparent;color:var(--text)}
+.accent-picker{display:flex;gap:6px;margin-top:6px}
+.color-btn{width:28px;height:28px;border-radius:6px;border:none;cursor:pointer}
+.theme-btn{margin-right:6px;padding:4px 8px;border-radius:6px;
+border:1px solid var(--border);background:transparent;color:var(--text)}
+.theme-btn.active{background:var(--accent);color:#fff}
 </style>
 </head>
 <body>
+
 <header>
-  <div class="logo" id="logo">PP</div>
+  <div class="logo">PP</div>
   <div>
     <h1>Puritan Parser</h1>
-    <div class="subtitle">Greek (GNT) and Biblical Hebrew — unified study tools</div>
+    <div style="color:var(--muted)">Greek 25+ | Hebrew 60+</div>
   </div>
 </header>
 
-<div class="tabs" role="tablist" aria-label="Language tabs">
-  <button class="tab active" data-lang="greek">Greek (GNT)</button>
-  <button class="tab" data-lang="hebrew">Hebrew (Biblical)</button>
+<div class="tabs">
+  <button class="tab active" data-lang="greek">Greek</button>
+  <button class="tab" data-lang="hebrew">Hebrew</button>
 </div>
 
-<div class="grid">
-  <!-- MAIN -->
-  <main class="panel" id="mainPanel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="row" style="gap:12px">
-        <div class="tag" id="langTag">Greek</div>
-        <div class="muted" id="entriesCount">0 entries</div>
-      </div>
-      <div class="row">
-        <button class="btn" id="flashBtn">Flashcards</button>
-        <button class="btn ghost" id="quizBtn">Quiz</button>
-        <button class="btn ghost" id="resetBtn">Reset Data</button>
-      </div>
-    </div>
+<div class="panel">
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+    <input id="search" placeholder="Search...">
+    <select id="sort">
+      <option value="freq-desc">Frequency ↓</option>
+      <option value="freq-asc">Frequency ↑</option>
+      <option value="az">A → Z</option>
+      <option value="za">Z → A</option>
+    </select>
+  </div>
 
-    <section style="margin-bottom:12px">
-      <div class="controls">
-        <div style="flex:1">
-          <label class="small">Search (word / lemma / gloss / pos)</label>
-          <input type="text" id="searchInput" placeholder="Search...">
-        </div>
-
-        <div style="width:180px">
-          <label class="small">Min frequency</label>
-          <div class="slider-row">
-            <input id="freqSlider" type="range" min="1" max="50" value="1">
-            <div class="muted" id="freqLabel">1+</div>
-          </div>
-        </div>
-
-        <div style="width:160px">
-          <label class="small">&nbsp;</label>
-          <select id="sortSelect" class="small">
-            <option value="freq-desc">Sort: freq ↓</option>
-            <option value="freq-asc">Sort: freq ↑</option>
-            <option value="word-az">Sort: word A→Z</option>
-            <option value="word-za">Sort: word Z→A</option>
-          </select>
-        </div>
-      </div>
-    </section>
-
-    <section id="listSection">
-      <table id="wordsTable" aria-live="polite">
-        <thead><tr><th>word</th><th>lemma</th><th>gloss</th><th>pos</th><th style="width:80px">freq</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <!-- Flashcard area -->
-    <section id="flashSection" style="display:none;margin-top:14px">
-      <div class="flashcard">
-        <div class="card-word" id="flashWord">---</div>
-        <div class="card-info" id="flashDetail">lemma • pos • freq</div>
-        <div style="margin-top:12px">
-          <button class="btn ghost small" id="revealBtn">Reveal</button>
-          <button class="btn small" id="markKnown">Known</button>
-          <button class="btn small" id="markAgain">Again</button>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:8px">
-        <div class="muted" id="flashProgress">0 / 0</div>
-        <div>
-          <button class="btn ghost small" id="exitFlash">Exit</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Quiz area -->
-    <section id="quizSection" style="display:none;margin-top:14px">
-      <div style="padding:12px;border-radius:10px;background:rgba(251,255,251,0.6);border:1px solid var(--border)">
-        <div id="quizQuestion" style="font-weight:700;font-size:18px;margin-bottom:8px">What is the gloss for: <span id="quizWord"></span> ?</div>
-        <div id="quizChoices" style="display:flex;flex-direction:column;gap:8px"></div>
-        <div style="display:flex;justify-content:space-between;margin-top:10px">
-          <div class="muted" id="quizScore">Score: 0</div>
-          <div>
-            <button class="btn ghost small" id="exitQuiz">Exit Quiz</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- SIDE PANEL -->
-  <aside class="panel">
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div>
-        <label class="small">Import CSV / JSON</label>
-        <input type="file" id="importFile" accept=".csv,application/json">
-        <div class="muted" style="font-size:13px;margin-top:6px">CSV headers: <code>word,lemma,gloss,pos,freq</code></div>
-      </div>
-
-      <div>
-        <label class="small">Quick actions</label>
-        <div style="display:flex;gap:8px">
-          <button class="btn small" id="exportBtn">Export JSON</button>
-          <button class="btn ghost small" id="downloadSample">Download sample</button>
-        </div>
-      </div>
-
-      <div>
-        <label class="small">Accent color</label>
-        <div class="accent-picker" id="accentPicker">
-          <!-- color buttons are created by JS at init -->
-        </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <input id="customColor" placeholder="#rrggbb" type="text" style="flex:1" />
-          <button class="btn small" id="applyCustom">Apply</button>
-        </div>
-      </div>
-
-      <div>
-        <label class="small">Theme (Light / Dark / System)</label>
-        <div class="theme-buttons" id="themeButtons">
-          <button class="theme-btn" data-theme="light">Light</button>
-          <button class="theme-btn" data-theme="dark">Dark</button>
-          <button class="theme-btn" data-theme="system">System</button>
-        </div>
-        <div class="muted" style="margin-top:6px">System follows your OS preference. Dark forces dark colors.</div>
-      </div>
-
-      <div>
-        <label class="small">Storage</label>
-        <div class="muted">Data saved locally in your browser (localStorage). Use Export to copy data out.</div>
-      </div>
-
-      <div style="margin-top:6px">
-        <label class="small">Tips</label>
-        <ul style="margin:6px 0 0 18px;padding:0">
-          <li class="muted">Use import to load full GNT / Hebrew lists (CSV or JSON)</li>
-          <li class="muted">Slider shows <strong>X+</strong> (single plus) — e.g. 50+ means frequency ≥ 50</li>
-        </ul>
-      </div>
-    </div>
-  </aside>
+  <table>
+    <thead>
+      <tr><th>Word</th><th>Lemma</th><th>Gloss</th><th>POS</th><th>Freq</th></tr>
+    </thead>
+    <tbody id="table"></tbody>
+  </table>
 </div>
 
-<footer>
-  Puritan Parser — Greek & Hebrew practice. Data stored locally.
-</footer>
+<div class="panel" style="margin-top:14px">
+  <strong>Accent Color</strong>
+  <div class="accent-picker">
+    <button class="color-btn" style="background:#4e8f6e" data-color="#4e8f6e"></button>
+    <button class="color-btn" style="background:#246b9c" data-color="#246b9c"></button>
+    <button class="color-btn" style="background:#8a2b2b" data-color="#8a2b2b"></button>
+    <button class="color-btn" style="background:#d97706" data-color="#d97706"></button>
+    <button class="color-btn" style="background:#475569" data-color="#475569"></button>
+  </div>
+
+  <div style="margin-top:12px">
+    <strong>Theme</strong><br>
+    <button class="theme-btn" data-theme="light">Light</button>
+    <button class="theme-btn" data-theme="dark">Dark</button>
+  </div>
+</div>
 
 <script>
-/* =========================
-   sample data (unchanged)
-   ========================= */
-const SAMPLE_GREEK = [
-  {word:"λόγος", lemma:"λόγος", gloss:"word, message", pos:"noun", freq:256},
-  {word:"ἀγαπάω", lemma:"ἀγαπάω", gloss:"to love", pos:"verb", freq:120},
-  {word:"θεός", lemma:"θεός", gloss:"God", pos:"noun", freq:224},
-  {word:"πιστός", lemma:"πιστός", gloss:"faithful", pos:"adj", freq:45}
-];
-const SAMPLE_HEBREW = [
-  {word:"דָּבָר", lemma:"דָּבָר", gloss:"word, thing", pos:"noun", freq:410},
-  {word:"אָהַב", lemma:"אָהַב", gloss:"to love", pos:"verb", freq:130},
-  {word:"אֱלֹהִים", lemma:"אֱלֹהִים", gloss:"God", pos:"noun", freq:300},
-  {word:"טוֹב", lemma:"טוֹב", gloss:"good", pos:"adj", freq:60}
-];
+let state={lang:"greek",data:{greek:[],hebrew:[]}};
 
-/* =========================
-   app state & keys
-   ========================= */
-let state = {
-  lang: 'greek',
-  data: { greek: [], hebrew: [] },
-  filtered: [],
-  mode: 'list',
-  flashQueue: [],
-  flashIndex: 0,
-  quiz: {score:0, remaining:[]}
-};
-const LS_KEYS = { greek: 'vocab_greek', hebrew: 'vocab_hebrew' };
-const PREF_KEYS = { accent: 'vocab_accent', theme: 'vocab_theme' };
-
-/* =========================
-   DOM refs
-   ========================= */
-const tabs = document.querySelectorAll('.tab');
-const langTag = document.getElementById('langTag');
-const entriesCount = document.getElementById('entriesCount');
-const searchInput = document.getElementById('searchInput');
-const freqSlider = document.getElementById('freqSlider');
-const freqLabel = document.getElementById('freqLabel');
-const sortSelect = document.getElementById('sortSelect');
-const wordsTableBody = document.querySelector('#wordsTable tbody');
-
-const flashBtn = document.getElementById('flashBtn');
-const quizBtn = document.getElementById('quizBtn');
-const flashSection = document.getElementById('flashSection');
-const flashWord = document.getElementById('flashWord');
-const flashDetail = document.getElementById('flashDetail');
-const revealBtn = document.getElementById('revealBtn');
-const markKnown = document.getElementById('markKnown');
-const markAgain = document.getElementById('markAgain');
-const flashProgress = document.getElementById('flashProgress');
-const exitFlash = document.getElementById('exitFlash');
-
-const quizSection = document.getElementById('quizSection');
-const quizWord = document.getElementById('quizWord');
-const quizChoices = document.getElementById('quizChoices');
-const quizScore = document.getElementById('quizScore');
-const exitQuiz = document.getElementById('exitQuiz');
-
-const importFile = document.getElementById('importFile');
-const exportBtn = document.getElementById('exportBtn');
-const downloadSample = document.getElementById('downloadSample');
-const resetBtn = document.getElementById('resetBtn');
-const accentPicker = document.getElementById('accentPicker');
-const customColor = document.getElementById('customColor');
-const applyCustom = document.getElementById('applyCustom');
-const themeButtons = document.getElementById('themeButtons');
-
-/* =========================
-   load data & prefs
-   ========================= */
-function loadData(){
-  try {
-    const g = localStorage.getItem(LS_KEYS.greek);
-    const h = localStorage.getItem(LS_KEYS.hebrew);
-    state.data.greek = g ? JSON.parse(g) : SAMPLE_GREEK.slice();
-    state.data.hebrew = h ? JSON.parse(h) : SAMPLE_HEBREW.slice();
-  } catch(e){
-    console.error(e);
-    state.data.greek = SAMPLE_GREEK.slice();
-    state.data.hebrew = SAMPLE_HEBREW.slice();
-  }
-}
-function loadPrefs(){
-  const acc = localStorage.getItem(PREF_KEYS.accent);
-  if(acc) document.documentElement.style.setProperty('--accent', acc);
-  const theme = localStorage.getItem(PREF_KEYS.theme) || 'system';
-  applyTheme(theme, false);
+async function loadData(){
+  const greek=await fetch("greek_25plus.json").then(r=>r.json());
+  const hebrew=await fetch("hebrew_60plus.json").then(r=>r.json());
+  state.data.greek=greek;
+  state.data.hebrew=hebrew;
+  render();
 }
 loadData();
-loadPrefs();
 
-/* =========================
-   Accent palette (options)
-   ========================= */
-const ACCENT_OPTIONS = [
-  {name:'Green', color:'#4e8f6e'},
-  {name:'Deep Blue', color:'#246b9c'},
-  {name:'Teal', color:'#2a9d8f'},
-  {name:'Maroon', color:'#8a2b2b'},
-  {name:'Amber', color:'#d97706'},
-  {name:'Slate', color:'#475569'}
-];
-
-function renderAccentButtons(){
-  accentPicker.innerHTML = '';
-  const current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-  ACCENT_OPTIONS.forEach(opt=>{
-    const b = document.createElement('button');
-    b.className = 'color-btn';
-    b.title = opt.name;
-    b.style.background = opt.color;
-    b.dataset.color = opt.color;
-    if(opt.color.toLowerCase() === current.toLowerCase()) b.classList.add('selected');
-    b.addEventListener('click', ()=> {
-      setAccent(opt.color);
-      // update selection visuals
-      document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('selected'));
-      b.classList.add('selected');
-    });
-    accentPicker.appendChild(b);
+function render(){
+  const list=state.data[state.lang]||[];
+  const q=document.getElementById("search").value.toLowerCase();
+  let filtered=list.filter(x=>
+    x.word.toLowerCase().includes(q)||
+    x.lemma.toLowerCase().includes(q)||
+    x.gloss.toLowerCase().includes(q)
+  );
+  const sort=document.getElementById("sort").value;
+  filtered.sort((a,b)=>{
+    if(sort==="freq-desc")return b.freq-a.freq;
+    if(sort==="freq-asc")return a.freq-b.freq;
+    if(sort==="az")return a.word.localeCompare(b.word);
+    if(sort==="za")return b.word.localeCompare(a.word);
+  });
+  const tbody=document.getElementById("table");
+  tbody.innerHTML="";
+  filtered.forEach(r=>{
+    tbody.innerHTML+=`<tr>
+      <td>${r.word}</td>
+      <td>${r.lemma}</td>
+      <td>${r.gloss}</td>
+      <td>${r.pos}</td>
+      <td>${r.freq}</td>
+    </tr>`;
   });
 }
-renderAccentButtons();
 
-function setAccent(hex){
-  document.documentElement.style.setProperty('--accent', hex);
-  localStorage.setItem(PREF_KEYS.accent, hex);
-  // ensure tab and ghost buttons picking up new accent colors immediately (no further action needed)
-}
-
-/* custom color input */
-applyCustom.addEventListener('click', ()=>{
-  const val = (customColor.value || '').trim();
-  if(!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(val)){ alert('Enter a valid hex color like #3b7a57'); return; }
-  setAccent(val);
-  // clear selection visuals (none of the preset buttons will match)
-  document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('selected'));
-});
-
-/* =========================
-   Theme selection (light/dark/system)
-   ========================= */
-function applyTheme(theme, persist=true){
-  // theme: 'light' | 'dark' | 'system'
-  if(theme === 'dark'){
-    document.documentElement.classList.add('dark');
-  } else if(theme === 'light'){
-    document.documentElement.classList.remove('dark');
-  } else { // system
-    document.documentElement.classList.remove('dark'); // allow media query to decide
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    state.lang=t.dataset.lang;
+    render();
   }
-  // update buttons UI
-  document.querySelectorAll('.theme-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.theme === theme);
-  });
-  if(persist) localStorage.setItem(PREF_KEYS.theme, theme);
-}
-themeButtons.addEventListener('click', (e)=>{
-  const btn = e.target.closest('.theme-btn');
-  if(!btn) return;
-  const theme = btn.dataset.theme;
-  applyTheme(theme, true);
 });
+document.getElementById("search").oninput=render;
+document.getElementById("sort").onchange=render;
 
-/* mark initial active theme button on load */
-(function markInitialTheme(){
-  const t = localStorage.getItem(PREF_KEYS.theme) || 'system';
-  applyTheme(t, false);
-})();
-
-/* =========================
-   Render / helpers
-   ========================= */
-function setLang(lang){
-  state.lang = lang;
-  tabs.forEach(t=>t.classList.toggle('active', t.dataset.lang===lang));
-  langTag.textContent = lang === 'greek' ? 'Greek' : 'Hebrew';
-  renderList();
-  showMode('list');
-}
-
-function getCurrentList(){ return state.data[state.lang] || []; }
-
-function renderList(){
-  const q = (searchInput.value || '').trim().toLowerCase();
-  const minFreq = Number(freqSlider.value) || 1;
-  let list = getCurrentList().filter(it=>{
-    const matchesFreq = it.freq >= minFreq;
-    if(!q) return matchesFreq;
-    const combined = `${it.word} ${it.lemma} ${it.gloss} ${it.pos}`.toLowerCase();
-    return matchesFreq && combined.includes(q);
-  });
-
-  const sort = sortSelect.value;
-  list.sort((a,b)=>{
-    if(sort==='freq-desc') return b.freq - a.freq;
-    if(sort==='freq-asc') return a.freq - b.freq;
-    if(sort==='word-az') return a.word.localeCompare(b.word);
-    if(sort==='word-za') return b.word.localeCompare(a.word);
-    return 0;
-  });
-
-  state.filtered = list;
-  entriesCount.textContent = `${list.length} entries`;
-
-  wordsTableBody.innerHTML = '';
-  for(const row of list){
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(row.word)}</td>
-                    <td>${escapeHtml(row.lemma || '')}</td>
-                    <td>${escapeHtml(row.gloss || '')}</td>
-                    <td>${escapeHtml(row.pos || '')}</td>
-                    <td>${escapeHtml(String(row.freq || 0))}</td>`;
-    wordsTableBody.appendChild(tr);
-  }
-}
-function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-/* =========================
-   UI events
-   ========================= */
-freqSlider.addEventListener('input', () => {
-  let v = Number(freqSlider.value);
-  freqLabel.textContent = (v >= 50) ? '50+' : `${v}+`;
-  renderList();
-});
-searchInput.addEventListener('input', debounce(()=>renderList(), 150));
-sortSelect.addEventListener('change', ()=>renderList());
-tabs.forEach(t=> t.addEventListener('click', ()=> setLang(t.dataset.lang)));
-
-/* =========================
-   Flashcards
-   ========================= */
-flashBtn.addEventListener('click', () => {
-  const source = state.filtered.length ? state.filtered.slice() : getCurrentList().slice();
-  if(!source.length){ alert('No entries to practice. Import or reduce min frequency.'); return; }
-  state.flashQueue = shuffle(source);
-  state.flashIndex = 0;
-  showMode('flash');
-  renderFlash();
-});
-function renderFlash(){
-  const q = state.flashQueue;
-  if(!q.length){ flashWord.textContent='—'; flashDetail.textContent='No cards'; flashProgress.textContent='0 / 0'; return; }
-  const cur = q[state.flashIndex];
-  flashWord.textContent = cur.word || '—';
-  flashDetail.textContent = '•••';
-  flashProgress.textContent = `${state.flashIndex+1} / ${q.length}`;
-  revealBtn.textContent = 'Reveal';
-}
-revealBtn.addEventListener('click', () => {
-  const cur = state.flashQueue[state.flashIndex];
-  if(!cur) return;
-  flashDetail.textContent = `${cur.lemma || ''} • ${cur.pos || ''} • freq ${cur.freq || 0}\nGloss: ${cur.gloss || ''}`;
-  revealBtn.textContent = revealBtn.textContent === 'Reveal' ? 'Hide' : 'Reveal';
-});
-markKnown.addEventListener('click', () => {
-  state.flashQueue.splice(state.flashIndex,1);
-  if(state.flashIndex >= state.flashQueue.length) state.flashIndex = Math.max(0, state.flashQueue.length-1);
-  if(!state.flashQueue.length){ alert('Done! All cards in this session completed.'); showMode('list'); renderList(); return; }
-  renderFlash();
-});
-markAgain.addEventListener('click', () => {
-  const cur = state.flashQueue[state.flashIndex];
-  state.flashQueue.splice(state.flashIndex,1);
-  state.flashQueue.push(cur);
-  if(state.flashIndex >= state.flashQueue.length) state.flashIndex = Math.max(0, state.flashQueue.length-1);
-  renderFlash();
-});
-exitFlash.addEventListener('click', ()=> showMode('list'));
-
-/* =========================
-   Quiz
-   ========================= */
-quizBtn.addEventListener('click', () => {
-  const source = state.filtered.length ? state.filtered.slice() : getCurrentList().slice();
-  if(source.length < 4){ alert('Need at least 4 items to make a multiple-choice quiz.'); return; }
-  state.quiz.score = 0;
-  state.quiz.remaining = shuffle(source).slice();
-  showMode('quiz');
-  renderQuizQuestion();
-});
-function renderQuizQuestion(){
-  const rem = state.quiz.remaining;
-  if(!rem.length){ alert(`Quiz finished — score ${state.quiz.score}`); showMode('list'); return; }
-  const correct = rem.pop();
-  quizWord.textContent = correct.word;
-  quizScore.textContent = `Score: ${state.quiz.score}`;
-  const pool = getCurrentList().filter(x => x !== correct);
-  const distractors = shuffle(pool).slice(0,3).map(d=>d.gloss);
-  const choices = shuffle([correct.gloss, ...distractors]);
-  quizChoices.innerHTML = '';
-  choices.forEach(c=>{
-    const btn = document.createElement('button');
-    btn.className = 'btn ghost small';
-    btn.textContent = c;
-    btn.addEventListener('click', () => {
-      if(c === correct.gloss){ state.quiz.score += 1; alert('Correct!'); }
-      else { alert(`Wrong — correct: ${correct.gloss}`); }
-      renderQuizQuestion();
-    });
-    quizChoices.appendChild(btn);
-  });
-}
-exitQuiz.addEventListener('click', ()=> showMode('list'));
-
-/* =========================
-   Mode switching
-   ========================= */
-function showMode(m){
-  state.mode = m;
-  document.getElementById('listSection').style.display = m === 'list' ? '' : 'none';
-  flashSection.style.display = m === 'flash' ? '' : 'none';
-  quizSection.style.display = m === 'quiz' ? '' : 'none';
-}
-
-/* =========================
-   Import / Export / Reset
-   ========================= */
-importFile.addEventListener('change', (e)=>{
-  const f = e.target.files[0];
-  if(!f) return;
-  const reader = new FileReader();
-  reader.onload = (ev)=>{
-    const text = ev.target.result;
-    try {
-      let parsed;
-      if(f.name.toLowerCase().endsWith('.json')){
-        parsed = JSON.parse(text);
-      } else {
-        parsed = csvToObjects(text);
-      }
-      const normalized = parsed.map(r => ({
-        word: r.word || r.surface || r.form || '',
-        lemma: r.lemma||'',
-        gloss: r.gloss||r.definition||'',
-        pos: r.pos||'',
-        freq: Number(r.freq || 0)
-      }));
-      state.data[state.lang] = normalized;
-      localStorage.setItem(LS_KEYS[state.lang], JSON.stringify(normalized));
-      alert(`Imported ${normalized.length} entries into ${state.lang}.`);
-      renderList();
-      importFile.value = '';
-    } catch(err){
-      console.error(err);
-      alert('Import failed: invalid file format.');
-      importFile.value = '';
-    }
+document.querySelectorAll(".color-btn").forEach(b=>{
+  b.onclick=()=>{
+    document.documentElement.style.setProperty("--accent",b.dataset.color);
   };
-  reader.readAsText(f);
 });
-exportBtn.addEventListener('click', ()=>{
-  const data = state.data[state.lang] || [];
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${state.lang}_vocab_export.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+document.querySelectorAll(".theme-btn").forEach(b=>{
+  b.onclick=()=>{
+    document.documentElement.classList.toggle("dark",b.dataset.theme==="dark");
+    document.querySelectorAll(".theme-btn").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+  };
 });
-downloadSample.addEventListener('click', ()=>{
-  const sample = state.lang === 'greek' ? SAMPLE_GREEK : SAMPLE_HEBREW;
-  const blob = new Blob([JSON.stringify(sample, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${state.lang}_sample.json`;
-  a.click();
-});
-resetBtn.addEventListener('click', () => {
-  if(!confirm('Reset current language to sample data? This will overwrite local saved data for this language.')) return;
-  const data = state.lang === 'greek' ? SAMPLE_GREEK.slice() : SAMPLE_HEBREW.slice();
-  state.data[state.lang] = data;
-  localStorage.setItem(LS_KEYS[state.lang], JSON.stringify(data));
-  renderList();
-});
-
-/* =========================
-   Utilities
-   ========================= */
-function debounce(fn, wait=200){
-  let t;
-  return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); };
-}
-function shuffle(a){ return a.slice().sort(()=>Math.random()-0.5); }
-
-/* CSV parser (simple) */
-function csvToObjects(text){
-  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.trim()!=='');
-  if(!lines.length) return [];
-  const header = lines.shift().split(',').map(h=>h.trim());
-  return lines.map(line => {
-    const parts = [];
-    let cur = '', inQ = false;
-    for(let i=0;i<line.length;i++){
-      const ch = line[i];
-      if(ch === '"' ) { inQ = !inQ; continue; }
-      if(ch === ',' && !inQ){ parts.push(cur); cur=''; continue; }
-      cur += ch;
-    }
-    parts.push(cur);
-    const obj = {};
-    for(let i=0;i<header.length;i++){
-      obj[header[i]] = parts[i] ? parts[i].trim() : '';
-    }
-    return obj;
-  });
-}
-
-/* keyboard shortcuts */
-document.addEventListener('keydown', e=>{
-  if(e.key === 'f' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); flashBtn.click(); }
-});
-
-/* accessibility roles */
-document.querySelectorAll('button').forEach(b=>b.setAttribute('role','button'));
-
-/* initialize UI */
-setLang('greek');
-renderList();
-(function markAccentSelection(){
-  // ensure one of the preset buttons is visually selected on load
-  const current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-  document.querySelectorAll('.color-btn').forEach(b=>{
-    if(b.dataset.color && b.dataset.color.toLowerCase() === current.toLowerCase()){
-      b.classList.add('selected');
-    }
-  });
-})();
-
 </script>
 </body>
 </html>
