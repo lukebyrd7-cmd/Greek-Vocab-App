@@ -1,286 +1,583 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>The Puritan Parser</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Biblical Vocab Trainer — Greek & Hebrew</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&display=swap');
-.greek-text { font-family: 'Noto Serif', serif; }
+  :root{
+    --accent: #4e8f6e; /* neutral green accent — change if you want */
+    --bg: #fbfdfb;
+    --card: #ffffff;
+    --muted: #666;
+    --radius: 10px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:#111;line-height:1.35;padding:18px}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+  .logo{width:44px;height:44px;border-radius:9px;background:linear-gradient(180deg, #fff 0%, rgba(0,0,0,0.02) 100%);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);border:2px solid rgba(0,0,0,0.06)}
+  h1{font-size:18px;margin:0}
+  .tabs{display:flex;gap:8px;margin:12px 0}
+  .tab{padding:8px 12px;border-radius:8px;background:transparent;border:1px solid transparent;cursor:pointer}
+  .tab.active{background:var(--accent);color:white;border-color:rgba(0,0,0,0.06)}
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:14px}
+  .panel{background:var(--card);padding:14px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .controls .search{flex:1;min-width:160px}
+  input[type="text"], select {width:100%;padding:8px;border-radius:8px;border:1px solid #ddd}
+  label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:8px;border-bottom:1px solid #f0f0f0;text-align:left}
+  th{font-weight:600;font-size:13px;color:var(--muted)}
+  .btn{background:var(--accent);color:white;padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
+  .small{font-size:13px;padding:6px 8px;border-radius:8px}
+  .muted{color:var(--muted);font-size:13px}
+  .row{display:flex;gap:8px;align-items:center}
+  .slider-row{display:flex;align-items:center;gap:12px}
+  input[type="range"]{width:160px}
+  .flashcard{display:flex;flex-direction:column;align-items:center;justify-content:center;height:220px}
+  .card-word{font-size:34px;font-weight:700;margin-bottom:8px}
+  .card-info{font-size:15px;color:var(--muted)}
+  .tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#f7fdf7;border:1px solid rgba(0,0,0,0.03);font-size:12px;color:var(--muted)}
+  footer{margin-top:16px;color:var(--muted);font-size:13px}
+  @media (max-width:900px){
+    .grid{grid-template-columns:1fr; }
+    .panel{padding:10px}
+  }
 </style>
 </head>
-
-<body class="bg-slate-950 text-slate-200 min-h-screen flex justify-center p-4">
-
-<div class="w-full max-w-4xl bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-2xl">
-
-<!-- HEADER -->
-<div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+<body>
+<header>
+  <div class="logo">BV</div>
   <div>
-    <h1 class="text-emerald-400 font-bold text-lg">The Puritan Parser</h1>
-    <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold">
-      Greek New Testament Fluency Engine
-    </p>
+    <h1>Biblical Vocab Trainer</h1>
+    <div class="muted">Greek (GNT) and Biblical Hebrew — unified app</div>
   </div>
+</header>
 
-  <div class="flex gap-2">
-    <button onclick="switchView('study')" id="study-tab"
-      class="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 bg-slate-800 text-slate-300">
-      📖 <span>Study</span>
-    </button>
-    <button onclick="switchView('dashboard')" id="dashboard-tab"
-      class="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 bg-emerald-600 text-white">
-      📊 <span>Dashboard</span>
-    </button>
-  </div>
+<div class="tabs" role="tablist" aria-label="Language tabs">
+  <button class="tab active" data-lang="greek">Greek (GNT)</button>
+  <button class="tab" data-lang="hebrew">Hebrew (Biblical)</button>
 </div>
 
-<!-- FREQUENCY FILTER -->
-<div class="mb-6">
-  <label class="text-xs text-slate-400 uppercase font-bold tracking-widest">
-    Minimum Frequency: <span id="freq-label">25+</span>
-  </label>
-  <input id="freq-slider" type="range" min="1" max="50" value="25" class="w-full mt-2">
+<div class="grid">
+  <!-- MAIN -->
+  <main class="panel" id="mainPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="row" style="gap:12px">
+        <div class="tag" id="langTag">Greek</div>
+        <div class="muted" id="entriesCount">0 entries</div>
+      </div>
+      <div class="row">
+        <button class="btn" id="flashBtn">Flashcards</button>
+        <button class="btn ghost" id="quizBtn">Quiz</button>
+        <button class="btn ghost" id="resetBtn">Reset Data</button>
+      </div>
+    </div>
+
+    <section style="margin-bottom:12px">
+      <div class="controls">
+        <div style="flex:1">
+          <label class="small">Search (word / lemma / gloss / pos)</label>
+          <input type="text" id="searchInput" placeholder="Search...">
+        </div>
+
+        <div style="width:180px">
+          <label class="small">Min frequency</label>
+          <div class="slider-row">
+            <input id="freqSlider" type="range" min="1" max="50" value="1">
+            <div class="muted" id="freqLabel">1+</div>
+          </div>
+        </div>
+
+        <div style="width:160px">
+          <label class="small">&nbsp;</label>
+          <select id="sortSelect" class="small">
+            <option value="freq-desc">Sort: freq ↓</option>
+            <option value="freq-asc">Sort: freq ↑</option>
+            <option value="word-az">Sort: word A→Z</option>
+            <option value="word-za">Sort: word Z→A</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section id="listSection">
+      <table id="wordsTable" aria-live="polite">
+        <thead><tr><th>word</th><th>lemma</th><th>gloss</th><th>pos</th><th style="width:80px">freq</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Flashcard area -->
+    <section id="flashSection" style="display:none;margin-top:14px">
+      <div class="flashcard">
+        <div class="card-word" id="flashWord">---</div>
+        <div class="card-info" id="flashDetail">lemma • pos • freq</div>
+        <div style="margin-top:12px">
+          <button class="btn ghost small" id="revealBtn">Reveal</button>
+          <button class="btn small" id="markKnown">Known</button>
+          <button class="btn small" id="markAgain">Again</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px">
+        <div class="muted" id="flashProgress">0 / 0</div>
+        <div>
+          <button class="btn ghost small" id="exitFlash">Exit</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quiz area -->
+    <section id="quizSection" style="display:none;margin-top:14px">
+      <div style="padding:12px;border-radius:10px;background:#fbfffbf0;border:1px solid rgba(0,0,0,0.02)">
+        <div id="quizQuestion" style="font-weight:700;font-size:18px;margin-bottom:8px">What is the gloss for: <span id="quizWord"></span> ?</div>
+        <div id="quizChoices" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px">
+          <div class="muted" id="quizScore">Score: 0</div>
+          <div>
+            <button class="btn ghost small" id="exitQuiz">Exit Quiz</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SIDE PANEL -->
+  <aside class="panel">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div>
+        <label class="small">Import CSV / JSON</label>
+        <input type="file" id="importFile" accept=".csv,application/json">
+        <div class="muted" style="font-size:13px;margin-top:6px">CSV headers: <code>word,lemma,gloss,pos,freq</code></div>
+      </div>
+
+      <div>
+        <label class="small">Quick actions</label>
+        <div style="display:flex;gap:8px">
+          <button class="btn small" id="exportBtn">Export JSON</button>
+          <button class="btn ghost small" id="downloadSample">Download sample</button>
+        </div>
+      </div>
+
+      <div>
+        <label class="small">Theme</label>
+        <div style="display:flex;gap:8px">
+          <button class="btn small" id="themeReset">Reset Green</button>
+          <button class="btn ghost small" id="chooseAccent">Change Accent</button>
+        </div>
+        <div class="muted" style="margin-top:6px">To change color edit <code>--accent</code> in CSS or use Change Accent.</div>
+      </div>
+
+      <div>
+        <label class="small">Storage</label>
+        <div class="muted">Data saved locally in your browser (localStorage). Use Export to copy data out.</div>
+      </div>
+
+      <div style="margin-top:6px">
+        <label class="small">Tips</label>
+        <ul style="margin:6px 0 0 18px;padding:0">
+          <li class="muted">Use import to load full GNT / Hebrew lists (CSV or JSON)</li>
+          <li class="muted">Slider shows <strong>X+</strong> (single plus) — e.g. 50+ means frequency ≥ 50</li>
+        </ul>
+      </div>
+    </div>
+  </aside>
 </div>
 
-<!-- ================= STUDY VIEW ================= -->
-<div id="study-view" class="hidden">
-
-<p class="text-center text-xs text-slate-500 uppercase tracking-widest mb-8">
-  Study Mode
-</p>
-
-<div class="text-center my-16">
-  <div id="word-tag" class="text-xs text-slate-500 uppercase tracking-widest mb-2">—</div>
-  <h2 id="greek-word" class="greek-text text-5xl font-bold mb-6">—</h2>
-
-  <div id="answer" class="hidden">
-    <p id="definition" class="text-2xl text-emerald-300 italic mb-4"></p>
-    <p class="text-xs uppercase text-slate-500 font-bold mb-1">
-      Context <span id="ref"></span>
-    </p>
-    <p id="sentence" class="greek-text text-lg text-slate-300"></p>
-  </div>
-</div>
-
-<div id="reveal-actions">
-  <button onclick="reveal()"
-    class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl">
-    Reveal
-  </button>
-</div>
-
-<div id="grade-actions" class="hidden grid grid-cols-2 gap-3">
-  <button onclick="grade(false)"
-    class="bg-slate-800 text-red-400 py-4 rounded-2xl">
-    Forgot
-  </button>
-  <button onclick="grade(true)"
-    class="bg-emerald-600 text-white py-4 rounded-2xl">
-    Knew It
-  </button>
-</div>
-
-</div>
-
-<!-- ================= DASHBOARD VIEW ================= -->
-<div id="dashboard-view">
-
-<p class="text-center text-xs text-slate-500 uppercase tracking-widest mb-6">
-  Vocabulary Dashboard
-</p>
-
-<div class="flex gap-3 mb-4">
-  <input id="search"
-    placeholder="Search lemma or gloss…"
-    class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm">
-  <select id="sort"
-    class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm">
-    <option value="frequency">Sort: Frequency</option>
-    <option value="level">Sort: Mastery</option>
-    <option value="due">Sort: Due Date</option>
-  </select>
-</div>
-
-<div class="overflow-auto max-h-[600px] rounded-xl border border-slate-800">
-<table class="w-full text-sm">
-<thead class="sticky top-0 bg-slate-900">
-<tr class="text-slate-400 text-xs uppercase">
-  <th class="text-left px-3 py-2">Lemma</th>
-  <th>Gloss</th>
-  <th>Freq</th>
-  <th>Level</th>
-  <th>Due</th>
-  <th>EF</th>
-  <th>Rep</th>
-  <th>Status</th>
-</tr>
-</thead>
-<tbody id="dashboard-table"></tbody>
-</table>
-</div>
-
-</div>
-
-</div>
+<footer>
+  Built for Biblical Greek & Hebrew study — paste your CSV (word,lemma,gloss,pos,freq). Contact me for adaptation.
+</footer>
 
 <script>
-const DATA_URL = "https://raw.githubusercontent.com/lukebyrd7-cmd/Greek-Vocab-App/main/vocab.json";
-const STORAGE_KEY = "puritan-parser-progress";
+/* =========================
+   In-memory sample data
+   ========================= */
+const SAMPLE_GREEK = [
+  {word:"λόγος", lemma:"λόγος", gloss:"word, message", pos:"noun", freq:256},
+  {word:"ἀγαπάω", lemma:"ἀγαπάω", gloss:"to love", pos:"verb", freq:120},
+  {word:"θεός", lemma:"θεός", gloss:"God", pos:"noun", freq:224},
+  {word:"πιστός", lemma:"πιστός", gloss:"faithful", pos:"adj", freq:45}
+];
+const SAMPLE_HEBREW = [
+  {word:"דָּבָר", lemma:"דָּבָר", gloss:"word, thing", pos:"noun", freq:410},
+  {word:"אָהַב", lemma:"אָהַב", gloss:"to love", pos:"verb", freq:130},
+  {word:"אֱלֹהִים", lemma:"אֱלֹהִים", gloss:"God", pos:"noun", freq:300},
+  {word:"טוֹב", lemma:"טוֹב", gloss:"good", pos:"adj", freq:60}
+];
 
-let vocab = [];
-let progress = {};
-let current = null;
-let minFrequency = 25;
+/* =========================
+   App state & helpers
+   ========================= */
+let state = {
+  lang: 'greek', // 'greek' or 'hebrew'
+  data: { greek: [], hebrew: [] },
+  filtered: [],
+  mode: 'list', // list | flash | quiz
+  flashQueue: [],
+  flashIndex: 0,
+  quiz: {score:0, remaining:[]}
+};
 
-// ---------- UTIL ----------
-const today = () => Date.now();
+const LS_KEYS = { greek: 'vocab_greek', hebrew: 'vocab_hebrew' };
 
-// ---------- STORAGE ----------
-function loadProgress() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) progress = JSON.parse(saved);
-}
-function saveProgress() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-}
+/* =========================
+   DOM refs
+   ========================= */
+const tabs = document.querySelectorAll('.tab');
+const langTag = document.getElementById('langTag');
+const entriesCount = document.getElementById('entriesCount');
+const searchInput = document.getElementById('searchInput');
+const freqSlider = document.getElementById('freqSlider');
+const freqLabel = document.getElementById('freqLabel');
+const sortSelect = document.getElementById('sortSelect');
+const wordsTableBody = document.querySelector('#wordsTable tbody');
 
-// ---------- INIT ----------
-async function init() {
-  loadProgress();
-  vocab = await fetch(DATA_URL).then(r => r.json());
+const flashBtn = document.getElementById('flashBtn');
+const quizBtn = document.getElementById('quizBtn');
+const flashSection = document.getElementById('flashSection');
+const flashWord = document.getElementById('flashWord');
+const flashDetail = document.getElementById('flashDetail');
+const revealBtn = document.getElementById('revealBtn');
+const markKnown = document.getElementById('markKnown');
+const markAgain = document.getElementById('markAgain');
+const flashProgress = document.getElementById('flashProgress');
+const exitFlash = document.getElementById('exitFlash');
 
-  vocab.forEach(v => {
-    if (!progress[v.lemma]) {
-      progress[v.lemma] = {
-        level: 0,
-        interval: 1,
-        due: today(),
-        ef: 2.5,
-        repetitions: 0
-      };
-    }
-  });
+const quizSection = document.getElementById('quizSection');
+const quizQuestion = document.getElementById('quizQuestion');
+const quizWord = document.getElementById('quizWord');
+const quizChoices = document.getElementById('quizChoices');
+const quizScore = document.getElementById('quizScore');
+const exitQuiz = document.getElementById('exitQuiz');
 
-  renderDashboard();   // dashboard is default
-}
+const importFile = document.getElementById('importFile');
+const exportBtn = document.getElementById('exportBtn');
+const downloadSample = document.getElementById('downloadSample');
+const resetBtn = document.getElementById('resetBtn');
+const themeReset = document.getElementById('themeReset');
+const chooseAccent = document.getElementById('chooseAccent');
 
-// ---------- FILTER ----------
-function filteredVocab() {
-  return vocab.filter(v => v.frequency >= minFrequency);
-}
-
-// ---------- STUDY ----------
-function nextCard() {
-  const pool = filteredVocab();
-  current = pool[Math.floor(Math.random() * pool.length)];
-  renderCard();
-}
-
-function renderCard() {
-  document.getElementById("greek-word").innerText = current.lemma;
-  document.getElementById("definition").innerText = current.gloss;
-  document.getElementById("word-tag").innerText = current.pos;
-  document.getElementById("sentence").innerText = current.example;
-  document.getElementById("ref").innerText = current.ref;
-
-  document.getElementById("answer").classList.add("hidden");
-  document.getElementById("reveal-actions").classList.remove("hidden");
-  document.getElementById("grade-actions").classList.add("hidden");
-}
-
-function reveal() {
-  document.getElementById("answer").classList.remove("hidden");
-  document.getElementById("reveal-actions").classList.add("hidden");
-  document.getElementById("grade-actions").classList.remove("hidden");
-}
-
-function grade(correct) {
-  const p = progress[current.lemma];
-  if (correct) {
-    p.level = Math.min(5, p.level + 1);
-    p.repetitions++;
-    p.interval = Math.round(p.interval * p.ef);
-    p.ef = Math.max(1.3, p.ef + 0.1);
-  } else {
-    p.level = 0;
-    p.repetitions = 0;
-    p.interval = 1;
+/* =========================
+   Init: load from localStorage or sample
+   ========================= */
+function loadData(){
+  try {
+    const g = localStorage.getItem(LS_KEYS.greek);
+    const h = localStorage.getItem(LS_KEYS.hebrew);
+    state.data.greek = g ? JSON.parse(g) : SAMPLE_GREEK.slice();
+    state.data.hebrew = h ? JSON.parse(h) : SAMPLE_HEBREW.slice();
+  } catch(e){
+    console.error(e);
+    state.data.greek = SAMPLE_GREEK.slice();
+    state.data.hebrew = SAMPLE_HEBREW.slice();
   }
-  p.due = today() + p.interval * 86400000;
-  saveProgress();
-  nextCard();
+}
+loadData();
+
+/* =========================
+   Render helpers
+   ========================= */
+function setLang(lang){
+  state.lang = lang;
+  tabs.forEach(t=>t.classList.toggle('active', t.dataset.lang===lang));
+  langTag.textContent = lang === 'greek' ? 'Greek' : 'Hebrew';
+  // update UI mode
+  renderList();
+  showMode('list');
 }
 
-// ---------- DASHBOARD ----------
-function renderDashboard() {
-  const q = document.getElementById("search").value.toLowerCase();
-  const sort = document.getElementById("sort").value;
+function getCurrentList(){
+  return state.data[state.lang] || [];
+}
 
-  let list = filteredVocab().filter(v =>
-    v.lemma.includes(q) || v.gloss.toLowerCase().includes(q)
-  );
-
-  list.sort((a, b) => {
-    const pa = progress[a.lemma];
-    const pb = progress[b.lemma];
-    if (sort === "frequency") return b.frequency - a.frequency;
-    if (sort === "level") return pb.level - pa.level;
-    if (sort === "due") return pa.due - pb.due;
+function renderList(){
+  // apply filters
+  const q = (searchInput.value || '').trim().toLowerCase();
+  const minFreq = Number(freqSlider.value) || 1;
+  let list = getCurrentList().filter(it=>{
+    const matchesFreq = it.freq >= minFreq;
+    if(!q) return matchesFreq;
+    const combined = `${it.word} ${it.lemma} ${it.gloss} ${it.pos}`.toLowerCase();
+    return matchesFreq && combined.includes(q);
   });
 
-  document.getElementById("dashboard-table").innerHTML = list.map(v => {
-    const p = progress[v.lemma];
-    const status =
-      p.level === 5 ? "Mastered" :
-      p.due <= today() ? "Due" : "Learning";
+  // sort
+  const sort = sortSelect.value;
+  list.sort((a,b)=>{
+    if(sort==='freq-desc') return b.freq - a.freq;
+    if(sort==='freq-asc') return a.freq - b.freq;
+    if(sort==='word-az') return a.word.localeCompare(b.word);
+    if(sort==='word-za') return b.word.localeCompare(a.word);
+    return 0;
+  });
 
-    return `
-    <tr class="border-b border-slate-800">
-      <td class="px-3 py-2 greek-text">${v.lemma}</td>
-      <td>${v.gloss}</td>
-      <td>${v.frequency}</td>
-      <td>${p.level}</td>
-      <td>${new Date(p.due).toLocaleDateString()}</td>
-      <td>${p.ef.toFixed(2)}</td>
-      <td>${p.repetitions}</td>
-      <td class="text-xs">${status}</td>
-    </tr>`;
-  }).join("");
+  state.filtered = list;
+  entriesCount.textContent = `${list.length} entries`;
+
+  // render rows
+  wordsTableBody.innerHTML = '';
+  for(const row of list){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(row.word)}</td>
+                    <td>${escapeHtml(row.lemma || '')}</td>
+                    <td>${escapeHtml(row.gloss || '')}</td>
+                    <td>${escapeHtml(row.pos || '')}</td>
+                    <td>${escapeHtml(String(row.freq || 0))}</td>`;
+    wordsTableBody.appendChild(tr);
+  }
 }
 
-// ---------- VIEW SWITCH ----------
-function switchView(v) {
-  document.getElementById("study-view").classList.toggle("hidden", v !== "study");
-  document.getElementById("dashboard-view").classList.toggle("hidden", v !== "dashboard");
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  document.getElementById("study-tab").classList.toggle("bg-emerald-600", v === "study");
-  document.getElementById("study-tab").classList.toggle("text-white", v === "study");
-  document.getElementById("study-tab").classList.toggle("bg-slate-800", v !== "study");
-
-  document.getElementById("dashboard-tab").classList.toggle("bg-emerald-600", v === "dashboard");
-  document.getElementById("dashboard-tab").classList.toggle("text-white", v === "dashboard");
-  document.getElementById("dashboard-tab").classList.toggle("bg-slate-800", v !== "dashboard");
-
-  if (v === "study") nextCard();
-  if (v === "dashboard") renderDashboard();
-}
-
-// ---------- EVENTS ----------
-document.getElementById("search").addEventListener("input", renderDashboard);
-document.getElementById("sort").addEventListener("change", renderDashboard);
-
-document.getElementById("freq-slider").addEventListener("input", e => {
-  minFrequency = +e.target.value;
-  document.getElementById("freq-label").innerText = minFrequency + "+";
-  renderDashboard();
+/* =========================
+   Slider UI behavior
+   ========================= */
+freqSlider.addEventListener('input', () => {
+  let v = Number(freqSlider.value);
+  freqLabel.textContent = (v >= 50) ? '50+' : `${v}+`;
+  renderList();
 });
 
-init();
-</script>
+/* =========================
+   Search & sort
+   ========================= */
+searchInput.addEventListener('input', debounce(()=>renderList(), 150));
+sortSelect.addEventListener('change', ()=>renderList());
 
+/* =========================
+   Tabs
+   ========================= */
+tabs.forEach(t=>{
+  t.addEventListener('click', ()=> setLang(t.dataset.lang));
+});
+
+/* =========================
+   Flashcards
+   ========================= */
+flashBtn.addEventListener('click', () => {
+  // prepare queue from filtered (or all if none)
+  const source = state.filtered.length ? state.filtered.slice() : getCurrentList().slice();
+  if(!source.length){ alert('No entries to practice. Import or reduce min frequency.'); return; }
+  state.flashQueue = shuffle(source);
+  state.flashIndex = 0;
+  showMode('flash');
+  renderFlash();
+});
+
+function renderFlash(){
+  const q = state.flashQueue;
+  if(!q.length){ flashWord.textContent='—'; flashDetail.textContent='No cards'; flashProgress.textContent='0 / 0'; return; }
+  const cur = q[state.flashIndex];
+  flashWord.textContent = cur.word || '—';
+  flashDetail.textContent = '•••';
+  flashProgress.textContent = `${state.flashIndex+1} / ${q.length}`;
+  revealBtn.textContent = 'Reveal';
+}
+
+revealBtn.addEventListener('click', () => {
+  const cur = state.flashQueue[state.flashIndex];
+  if(!cur) return;
+  flashDetail.textContent = `${cur.lemma || ''} • ${cur.pos || ''} • freq ${cur.freq || 0}\nGloss: ${cur.gloss || ''}`;
+  revealBtn.textContent = 'Hide';
+});
+
+markKnown.addEventListener('click', () => {
+  // simple behaviour: remove current card from queue
+  state.flashQueue.splice(state.flashIndex,1);
+  if(state.flashIndex >= state.flashQueue.length) state.flashIndex = Math.max(0, state.flashQueue.length-1);
+  if(!state.flashQueue.length){ alert('Done! All cards in this session completed.'); showMode('list'); renderList(); return; }
+  renderFlash();
+});
+
+markAgain.addEventListener('click', () => {
+  // push current card to the end and advance
+  const cur = state.flashQueue[state.flashIndex];
+  state.flashQueue.splice(state.flashIndex,1);
+  state.flashQueue.push(cur);
+  if(state.flashIndex >= state.flashQueue.length) state.flashIndex = Math.max(0, state.flashQueue.length-1);
+  renderFlash();
+});
+
+exitFlash.addEventListener('click', ()=> showMode('list'));
+
+/* =========================
+   Quiz
+   ========================= */
+quizBtn.addEventListener('click', () => {
+  const source = state.filtered.length ? state.filtered.slice() : getCurrentList().slice();
+  if(source.length < 4){ alert('Need at least 4 items to make a multiple-choice quiz.'); return; }
+  state.quiz.score = 0;
+  state.quiz.remaining = shuffle(source).slice(); // will pop
+  showMode('quiz');
+  renderQuizQuestion();
+});
+
+function renderQuizQuestion(){
+  const rem = state.quiz.remaining;
+  if(!rem.length){ alert(`Quiz finished — score ${state.quiz.score}`); showMode('list'); return; }
+  const correct = rem.pop();
+  quizWord.textContent = correct.word;
+  quizScore.textContent = `Score: ${state.quiz.score}`;
+  // create choices: correct gloss + 3 random distractors
+  const pool = getCurrentList().filter(x => x !== correct);
+  const distractors = shuffle(pool).slice(0,3).map(d=>d.gloss);
+  const choices = shuffle([correct.gloss, ...distractors]);
+  quizChoices.innerHTML = '';
+  choices.forEach(c=>{
+    const btn = document.createElement('button');
+    btn.className = 'btn ghost small';
+    btn.textContent = c;
+    btn.addEventListener('click', () => {
+      if(c === correct.gloss){ state.quiz.score += 1; alert('Correct!'); }
+      else { alert(`Wrong — correct: ${correct.gloss}`); }
+      renderQuizQuestion();
+    });
+    quizChoices.appendChild(btn);
+  });
+}
+
+exitQuiz.addEventListener('click', ()=> showMode('list'));
+
+/* =========================
+   Mode switching
+   ========================= */
+function showMode(m){
+  state.mode = m;
+  document.getElementById('listSection').style.display = m === 'list' ? '' : 'none';
+  flashSection.style.display = m === 'flash' ? '' : 'none';
+  quizSection.style.display = m === 'quiz' ? '' : 'none';
+}
+
+/* =========================
+   Import / Export
+   ========================= */
+importFile.addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    const text = ev.target.result;
+    try {
+      let parsed;
+      if(f.name.toLowerCase().endsWith('.json')){
+        parsed = JSON.parse(text);
+      } else {
+        parsed = csvToObjects(text);
+      }
+      // normalize and write to current language
+      const normalized = parsed.map(r => ({
+        word: r.word || r.surface || r.form || '',
+        lemma: r.lemma||'',
+        gloss: r.gloss||r.definition||'',
+        pos: r.pos||'',
+        freq: Number(r.freq || 0)
+      }));
+      state.data[state.lang] = normalized;
+      localStorage.setItem(LS_KEYS[state.lang], JSON.stringify(normalized));
+      alert(`Imported ${normalized.length} entries into ${state.lang}.`);
+      renderList();
+      importFile.value = '';
+    } catch(err){
+      console.error(err);
+      alert('Import failed: invalid file format.');
+      importFile.value = '';
+    }
+  };
+  reader.readAsText(f);
+});
+
+exportBtn.addEventListener('click', ()=>{
+  const data = state.data[state.lang] || [];
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${state.lang}_vocab_export.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+downloadSample.addEventListener('click', ()=>{
+  const sample = state.lang === 'greek' ? SAMPLE_GREEK : SAMPLE_HEBREW;
+  const blob = new Blob([JSON.stringify(sample, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${state.lang}_sample.json`;
+  a.click();
+});
+
+resetBtn.addEventListener('click', () => {
+  if(!confirm('Reset current language to sample data? This will overwrite local saved data for this language.')) return;
+  const data = state.lang === 'greek' ? SAMPLE_GREEK.slice() : SAMPLE_HEBREW.slice();
+  state.data[state.lang] = data;
+  localStorage.setItem(LS_KEYS[state.lang], JSON.stringify(data));
+  renderList();
+});
+
+/* =========================
+   Theme controls
+   ========================= */
+themeReset.addEventListener('click', ()=>{
+  document.documentElement.style.setProperty('--accent', '#4e8f6e');
+});
+chooseAccent.addEventListener('click', ()=>{
+  const val = prompt('Enter a hex color (example: #3b7a57) for the accent:','');
+  if(val && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(val)){
+    document.documentElement.style.setProperty('--accent', val);
+  } else if(val){
+    alert('Invalid hex color. Example valid format: #3b7a57');
+  }
+});
+
+/* =========================
+   Utilities
+   ========================= */
+function debounce(fn, wait=200){
+  let t;
+  return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); };
+}
+function shuffle(a){ return a.slice().sort(()=>Math.random()-0.5); }
+
+/* CSV parser (simple) */
+function csvToObjects(text){
+  // handles basic CSV with header line
+  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.trim()!=='');
+  if(!lines.length) return [];
+  const header = lines.shift().split(',').map(h=>h.trim());
+  return lines.map(line => {
+    // handle quoted fields rudimentarily
+    const parts = [];
+    let cur = '', inQ = false;
+    for(let i=0;i<line.length;i++){
+      const ch = line[i];
+      if(ch === '"' ) { inQ = !inQ; continue; }
+      if(ch === ',' && !inQ){ parts.push(cur); cur=''; continue; }
+      cur += ch;
+    }
+    parts.push(cur);
+    const obj = {};
+    for(let i=0;i<header.length;i++){
+      obj[header[i]] = parts[i] ? parts[i].trim() : '';
+    }
+    return obj;
+  });
+}
+
+/* small helper to ensure UI initial state */
+setLang('greek');
+renderList();
+
+/* keyboard shortcuts (optional) */
+document.addEventListener('keydown', e=>{
+  if(e.key === 'f' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); flashBtn.click(); }
+});
+
+/* Accessibility / safe defaults */
+document.querySelectorAll('button').forEach(b=>b.setAttribute('role','button'));
+</script>
 </body>
 </html>
