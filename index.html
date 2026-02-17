@@ -6,26 +6,24 @@
 <title>Puritan Parser — Greek & Hebrew</title>
 <style>
   :root{
-    --accent: #4e8f6e; /* default accent */
+    --accent: #4e8f6e;
     --bg: #fbfdfb;
-    --card: #ffffff;
+    --card: #fff;
     --muted: #666;
     --text: #111;
     --border: rgba(0,0,0,0.06);
     --radius: 10px;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   }
-  /* system dark (used when `system` or prefers-color-scheme) */
   @media (prefers-color-scheme: dark){
     :root{ --bg:#0f1720; --card:#0b1216; --muted:#9aa4ab; --text:#e6eef2; --border:rgba(255,255,255,0.04); }
   }
-  /* forced dark */
   .dark{ --bg:#0f1720; --card:#0b1216; --muted:#9aa4ab; --text:#e6eef2; --border:rgba(255,255,255,0.04); }
 
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);line-height:1.35;padding:18px}
   header{display:flex;align-items:center;gap:16px;margin-bottom:14px}
-  .logo{width:44px;height:44px;border-radius:9px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);border:2px solid var(--border)}
+  .logo{width:44px;height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);border:2px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03))}
   h1{font-size:18px;margin:0}
   .subtitle{font-size:13px;color:var(--muted)}
   .tabs{display:flex;gap:8px;margin:12px 0}
@@ -34,7 +32,6 @@
   .grid{display:grid;grid-template-columns:1fr 360px;gap:14px}
   .panel{background:var(--card);padding:14px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,0.04)}
   .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .controls .search{flex:1;min-width:160px}
   input[type="text"], input[type="file"], select, input[type="number"] {width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text)}
   label.small{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
   table{width:100%;border-collapse:collapse;font-size:14px}
@@ -58,6 +55,7 @@
   .theme-buttons{display:flex;gap:8px;align-items:center}
   .theme-btn{padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer}
   .theme-btn.active{background:var(--accent);color:#fff;border-color:var(--border)}
+  .note{font-size:13px;color:var(--muted);margin-top:8px}
   @media (max-width:900px){
     .grid{grid-template-columns:1fr; }
     .panel{padding:10px}
@@ -69,7 +67,7 @@
   <div class="logo" id="logo">PP</div>
   <div>
     <h1>Puritan Parser</h1>
-    <div class="subtitle">Greek (GNT) and Biblical Hebrew — full feature set</div>
+    <div class="subtitle">Greek (GNT) and Biblical Hebrew — robust loader</div>
   </div>
 </header>
 
@@ -79,7 +77,6 @@
 </div>
 
 <div class="grid">
-  <!-- MAIN -->
   <main class="panel" id="mainPanel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div class="row" style="gap:12px">
@@ -123,11 +120,10 @@
     <section id="listSection">
       <table id="wordsTable" aria-live="polite">
         <thead><tr><th>word</th><th>lemma</th><th>gloss</th><th>pos</th><th style="width:80px">freq</th></tr></thead>
-        <tbody></tbody>
+        <tbody id="wordsTbody"></tbody>
       </table>
     </section>
 
-    <!-- Flashcard area -->
     <section id="flashSection" style="display:none;margin-top:14px">
       <div class="flashcard">
         <div class="card-word" id="flashWord">---</div>
@@ -146,7 +142,6 @@
       </div>
     </section>
 
-    <!-- Quiz area -->
     <section id="quizSection" style="display:none;margin-top:14px">
       <div style="padding:12px;border-radius:10px;background:rgba(251,255,251,0.6);border:1px solid var(--border)">
         <div id="quizQuestion" style="font-weight:700;font-size:18px;margin-bottom:8px">What is the gloss for: <span id="quizWord"></span> ?</div>
@@ -162,7 +157,6 @@
 
   </main>
 
-  <!-- SIDE PANEL -->
   <aside class="panel">
     <div style="display:flex;flex-direction:column;gap:10px">
       <div>
@@ -199,14 +193,17 @@
       </div>
 
       <div>
-        <label class="small">Storage</label>
-        <div class="muted">Data saved locally in your browser (localStorage). Use Export to copy data out.</div>
+        <label class="small">Files</label>
+        <div style="display:flex;gap:8px">
+          <button class="btn small" id="reloadFiles">Reload data files</button>
+          <button class="btn ghost small" id="clearLocal">Clear saved data</button>
+        </div>
+        <div class="note">Place <code>greek_25plus.json</code> and <code>hebrew_60plus.json</code> next to this file and serve via HTTP to auto-load full lists.</div>
       </div>
 
       <div style="margin-top:6px">
         <label class="small">Tips</label>
         <ul style="margin:6px 0 0 18px;padding:0">
-          <li class="muted">Place <code>greek_25plus.json</code> and <code>hebrew_60plus.json</code> next to this file and serve via HTTP to auto-load full lists.</li>
           <li class="muted">Slider shows <strong>X+</strong> (single plus) — e.g. 50+ means frequency ≥ 50</li>
         </ul>
       </div>
@@ -214,14 +211,12 @@
   </aside>
 </div>
 
-<footer>
-  Puritan Parser — full feature Greek & Hebrew practice. Data stored locally.
-</footer>
+<footer>Puritan Parser — made robust. Data stored locally.</footer>
 
 <script>
-/* =========================
-   SAMPLE fallback data (small)
-   ========================= */
+/* ---------------------
+   Embedded sample data (fallback)
+   --------------------- */
 const SAMPLE_GREEK = [
   {word:"λόγος", lemma:"λόγος", gloss:"word, message", pos:"noun", freq:330},
   {word:"ἀγαπάω", lemma:"ἀγαπάω", gloss:"to love", pos:"verb", freq:120},
@@ -229,30 +224,33 @@ const SAMPLE_GREEK = [
   {word:"πιστός", lemma:"πιστός", gloss:"faithful", pos:"adj", freq:45}
 ];
 const SAMPLE_HEBREW = [
-  {word:"דָּבָר", lemma:"דָּבָר", gloss:"word, thing", pos:"noun", freq:1135},
-  {word":"אָמַר","lemma":"אָמַר","gloss":"to say","pos":"verb","freq":5317},
-  {word:"אֱלֹהִים", lemma:"אֱלֹהִים", gloss:"God", pos:"noun", freq:300},
-  {word:"טוֹב", lemma:"טוֹב", gloss:"good", pos:"adj", freq:60}
+  {"word":"דָּבָר","lemma":"דָּבָר","gloss":"word, thing","pos":"noun","freq":1135},
+  {"word":"אָמַר","lemma":"אָמַר","gloss":"to say","pos":"verb","freq":5317},
+  {"word":"אֱלֹהִים","lemma":"אֱלֹהִים","gloss":"God","pos":"noun","freq":300},
+  {"word":"טוֹב","lemma":"טוֹב","gloss":"good","pos":"adj","freq":60}
 ];
 
-/* =========================
-   State & keys
-   ========================= */
+/* ---------------------
+   App state & keys
+   --------------------- */
+const FILE_GREEK = 'greek_25plus.json';
+const FILE_HEBREW = 'hebrew_60plus.json';
+const LS_KEYS = { greek: 'vocab_greek', hebrew: 'vocab_hebrew' };
+const PREF_KEYS = { accent: 'vocab_accent', theme: 'vocab_theme' };
+
 let state = {
-  lang: 'greek', // 'greek' | 'hebrew'
+  lang: 'greek',
   data: { greek: [], hebrew: [] },
   filtered: [],
   mode: 'list',
   flashQueue: [],
   flashIndex: 0,
-  quiz: {score:0, remaining:[]}
+  quiz: { score: 0, remaining: [] }
 };
-const LS_KEYS = { greek: 'vocab_greek', hebrew: 'vocab_hebrew' };
-const PREF_KEYS = { accent: 'vocab_accent', theme: 'vocab_theme' };
 
-/* =========================
-   DOM refs
-   ========================= */
+/* ---------------------
+   DOM refs (safe)
+   --------------------- */
 const tabs = document.querySelectorAll('.tab');
 const langTag = document.getElementById('langTag');
 const entriesCount = document.getElementById('entriesCount');
@@ -260,7 +258,7 @@ const searchInput = document.getElementById('searchInput');
 const freqSlider = document.getElementById('freqSlider');
 const freqLabel = document.getElementById('freqLabel');
 const sortSelect = document.getElementById('sortSelect');
-const wordsTableBody = document.querySelector('#wordsTable tbody');
+const wordsTbody = document.getElementById('wordsTbody');
 
 const flashBtn = document.getElementById('flashBtn');
 const quizBtn = document.getElementById('quizBtn');
@@ -287,10 +285,12 @@ const accentPicker = document.getElementById('accentPicker');
 const customColor = document.getElementById('customColor');
 const applyCustom = document.getElementById('applyCustom');
 const themeButtons = document.getElementById('themeButtons');
+const reloadFilesBtn = document.getElementById('reloadFiles');
+const clearLocalBtn = document.getElementById('clearLocal');
 
-/* =========================
-   Accent & Theme options
-   ========================= */
+/* ---------------------
+   Accent & theme options
+   --------------------- */
 const ACCENT_OPTIONS = [
   {name:'Green', color:'#4e8f6e'},
   {name:'Deep Blue', color:'#246b9c'},
@@ -325,31 +325,23 @@ function setAccent(hex){
   localStorage.setItem(PREF_KEYS.accent, hex);
 }
 
-/* theme handling */
+/* theme apply */
 function applyTheme(theme, persist=true){
-  // theme: 'light' | 'dark' | 'system'
-  if(theme === 'dark'){
-    document.documentElement.classList.add('dark');
-  } else if(theme === 'light'){
-    document.documentElement.classList.remove('dark');
-  } else { // system
-    document.documentElement.classList.remove('dark'); // allow media query
-  }
+  if(theme === 'dark'){ document.documentElement.classList.add('dark'); }
+  else if(theme === 'light'){ document.documentElement.classList.remove('dark'); }
+  else { document.documentElement.classList.remove('dark'); } // system -> allow media query
   document.querySelectorAll('.theme-btn').forEach(b=>{
     b.classList.toggle('active', b.dataset.theme === theme);
   });
   if(persist) localStorage.setItem(PREF_KEYS.theme, theme);
 }
 
-/* =========================
-   Load prefs & data (attempt fetch of full lists)
-   ========================= */
-function loadPrefs(){
+/* load prefs */
+(function loadPrefs(){
   const acc = localStorage.getItem(PREF_KEYS.accent);
   if(acc) document.documentElement.style.setProperty('--accent', acc);
   const theme = localStorage.getItem(PREF_KEYS.theme) || 'system';
   applyTheme(theme, false);
-  // mark accent selected if matches
   setTimeout(()=> {
     const current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
     document.querySelectorAll('.color-btn').forEach(b=>{
@@ -358,57 +350,93 @@ function loadPrefs(){
       }
     });
   }, 50);
+})();
+
+/* ---------------------
+   Data loading: localStorage -> fetch files -> fallback sample
+   --------------------- */
+async function tryFetchJson(path){
+  try {
+    const res = await fetch(path);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    if(!Array.isArray(j)) throw new Error('Not an array JSON');
+    console.log('Loaded', path, 'count=', j.length);
+    return j;
+  } catch(err){
+    console.warn('fetch failed for', path, err);
+    return null;
+  }
 }
-loadPrefs();
 
 async function loadData(){
-  // try localStorage first (user may have imported before)
+  // 1. Try localStorage (per-language). If both exist and non-empty, use them.
   try {
-    const g = localStorage.getItem(LS_KEYS.greek);
-    const h = localStorage.getItem(LS_KEYS.hebrew);
-    if(g && h){
-      state.data.greek = JSON.parse(g);
-      state.data.hebrew = JSON.parse(h);
-      console.log('Loaded datasets from localStorage.');
-      renderList();
-      return;
+    const gLS = localStorage.getItem(LS_KEYS.greek);
+    const hLS = localStorage.getItem(LS_KEYS.hebrew);
+    if(gLS && hLS){
+      const g = JSON.parse(gLS);
+      const h = JSON.parse(hLS);
+      if(Array.isArray(g) && Array.isArray(h) && g.length && h.length){
+        state.data.greek = g;
+        state.data.hebrew = h;
+        console.log('Loaded both languages from localStorage.');
+        renderList();
+        return;
+      }
     }
-  } catch(e){ console.warn('localStorage read failed', e); }
-
-  // Try to fetch external JSON files (greek_25plus.json / hebrew_60plus.json).
-  // This works when serving over HTTP AND the files are present next to index.html.
-  try {
-    const [gRes, hRes] = await Promise.allSettled([
-      fetch('greek_25plus.json'),
-      fetch('hebrew_60plus.json')
-    ]);
-    if(gRes.status === 'fulfilled' && gRes.value.ok){
-      const gjson = await gRes.value.json();
-      state.data.greek = Array.isArray(gjson) ? gjson : SAMPLE_GREEK.slice();
-      localStorage.setItem(LS_KEYS.greek, JSON.stringify(state.data.greek));
-    } else {
-      state.data.greek = SAMPLE_GREEK.slice();
-    }
-    if(hRes.status === 'fulfilled' && hRes.value.ok){
-      const hjson = await hRes.value.json();
-      state.data.hebrew = Array.isArray(hjson) ? hjson : SAMPLE_HEBREW.slice();
-      localStorage.setItem(LS_KEYS.hebrew, JSON.stringify(state.data.hebrew));
-    } else {
-      state.data.hebrew = SAMPLE_HEBREW.slice();
-    }
-    console.log('Datasets loaded (from files or sample).');
-  } catch(err){
-    console.warn('Auto-load failed; using sample data.', err);
-    state.data.greek = SAMPLE_GREEK.slice();
-    state.data.hebrew = SAMPLE_HEBREW.slice();
+  } catch(e){
+    console.warn('localStorage read error', e);
   }
+
+  // 2. Try to fetch each JSON file independently
+  let gFromFile = await tryFetchJson(FILE_GREEK);
+  let hFromFile = await tryFetchJson(FILE_HEBREW);
+
+  // use file results if present; otherwise try localStorage per-lang; otherwise use embedded sample
+  if(gFromFile && gFromFile.length) {
+    state.data.greek = gFromFile;
+    try { localStorage.setItem(LS_KEYS.greek, JSON.stringify(gFromFile)); } catch(e){}
+  } else {
+    // try localStorage single-lang
+    try {
+      const gLS = localStorage.getItem(LS_KEYS.greek);
+      if(gLS){
+        const parsed = JSON.parse(gLS);
+        if(Array.isArray(parsed) && parsed.length) state.data.greek = parsed;
+        else state.data.greek = SAMPLE_GREEK.slice();
+      } else {
+        state.data.greek = SAMPLE_GREEK.slice();
+      }
+    } catch(e){ state.data.greek = SAMPLE_GREEK.slice(); }
+  }
+
+  if(hFromFile && hFromFile.length) {
+    state.data.hebrew = hFromFile;
+    try { localStorage.setItem(LS_KEYS.hebrew, JSON.stringify(hFromFile)); } catch(e){}
+  } else {
+    try {
+      const hLS = localStorage.getItem(LS_KEYS.hebrew);
+      if(hLS){
+        const parsed = JSON.parse(hLS);
+        if(Array.isArray(parsed) && parsed.length) state.data.hebrew = parsed;
+        else state.data.hebrew = SAMPLE_HEBREW.slice();
+      } else {
+        state.data.hebrew = SAMPLE_HEBREW.slice();
+      }
+    } catch(e){ state.data.hebrew = SAMPLE_HEBREW.slice(); }
+  }
+
+  console.log('Data load complete. Greek:', state.data.greek.length, 'Hebrew:', state.data.hebrew.length);
   renderList();
 }
+
+/* Kick off loading */
 loadData();
 
-/* =========================
-   Render / filtering / sorting
-   ========================= */
+/* ---------------------
+   Rendering + filtering
+   --------------------- */
 function setLang(lang){
   state.lang = lang;
   tabs.forEach(t=>t.classList.toggle('active', t.dataset.lang===lang));
@@ -423,41 +451,50 @@ function renderList(){
   const q = (searchInput.value || '').trim().toLowerCase();
   const minFreq = Number(freqSlider.value) || 1;
   let list = getCurrentList().filter(it=>{
-    const matchesFreq = it.freq >= minFreq;
-    if(!q) return matchesFreq;
-    const combined = `${it.word} ${it.lemma} ${it.gloss} ${it.pos}`.toLowerCase();
-    return matchesFreq && combined.includes(q);
+    if(!it) return false;
+    const freqOk = (typeof it.freq === 'number') ? it.freq >= minFreq : (Number(it.freq || 0) >= minFreq);
+    if(!q) return freqOk;
+    const combined = `${it.word || ''} ${it.lemma || ''} ${it.gloss || ''} ${it.pos || ''}`.toLowerCase();
+    return freqOk && combined.includes(q);
   });
 
   const sort = sortSelect.value;
   list.sort((a,b)=>{
-    if(sort==='freq-desc') return b.freq - a.freq;
-    if(sort==='freq-asc') return a.freq - b.freq;
-    if(sort==='word-az') return a.word.localeCompare(b.word);
-    if(sort==='word-za') return b.word.localeCompare(a.word);
+    if(sort==='freq-desc') return (b.freq||0) - (a.freq||0);
+    if(sort==='freq-asc') return (a.freq||0) - (b.freq||0);
+    if(sort==='word-az') return String(a.word||'').localeCompare(String(b.word||''));
+    if(sort==='word-za') return String(b.word||'').localeCompare(String(a.word||''));
     return 0;
   });
 
   state.filtered = list;
   entriesCount.textContent = `${list.length} entries`;
 
-  wordsTableBody.innerHTML = '';
+  // render rows
+  wordsTbody.innerHTML = '';
+  if(!list.length){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="5" class="muted">No entries found. Try reducing min frequency, clearing search, importing data, or click "Reload data files".</td>`;
+    wordsTbody.appendChild(tr);
+    return;
+  }
+
   for(const row of list){
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(row.word)}</td>
-                    <td>${escapeHtml(row.lemma || '')}</td>
-                    <td>${escapeHtml(row.gloss || '')}</td>
-                    <td>${escapeHtml(row.pos || '')}</td>
-                    <td>${escapeHtml(String(row.freq || 0))}</td>`;
-    wordsTableBody.appendChild(tr);
+    tr.innerHTML = `<td>${escapeHtml(row.word||'')}</td>
+                    <td>${escapeHtml(row.lemma||'')}</td>
+                    <td>${escapeHtml(row.gloss||'')}</td>
+                    <td>${escapeHtml(row.pos||'')}</td>
+                    <td>${escapeHtml(String(row.freq||0))}</td>`;
+    wordsTbody.appendChild(tr);
   }
 }
 
 function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-/* =========================
-   UI event wiring
-   ========================= */
+/* ---------------------
+   Events wiring
+   --------------------- */
 freqSlider.addEventListener('input', () => {
   let v = Number(freqSlider.value);
   freqLabel.textContent = (v >= 50) ? '50+' : `${v}+`;
@@ -466,10 +503,20 @@ freqSlider.addEventListener('input', () => {
 searchInput.addEventListener('input', debounce(()=>renderList(), 150));
 sortSelect.addEventListener('change', ()=>renderList());
 tabs.forEach(t=> t.addEventListener('click', ()=> setLang(t.dataset.lang)));
+reloadFilesBtn.addEventListener('click', ()=> loadData());
+clearLocalBtn.addEventListener('click', ()=> {
+  if(!confirm('Clear saved vocab for both languages from localStorage?')) return;
+  localStorage.removeItem(LS_KEYS.greek);
+  localStorage.removeItem(LS_KEYS.hebrew);
+  alert('Cleared. Reloading embedded samples.');
+  state.data.greek = SAMPLE_GREEK.slice();
+  state.data.hebrew = SAMPLE_HEBREW.slice();
+  renderList();
+});
 
-/* =========================
+/* ---------------------
    Flashcards
-   ========================= */
+   --------------------- */
 flashBtn.addEventListener('click', () => {
   const source = state.filtered.length ? state.filtered.slice() : getCurrentList().slice();
   if(!source.length){ alert('No entries to practice. Import or reduce min frequency.'); return; }
@@ -478,7 +525,6 @@ flashBtn.addEventListener('click', () => {
   showMode('flash');
   renderFlash();
 });
-
 function renderFlash(){
   const q = state.flashQueue;
   if(!q.length){ flashWord.textContent='—'; flashDetail.textContent='No cards'; flashProgress.textContent='0 / 0'; return; }
@@ -488,7 +534,6 @@ function renderFlash(){
   flashProgress.textContent = `${state.flashIndex+1} / ${q.length}`;
   revealBtn.textContent = 'Reveal';
 }
-
 revealBtn.addEventListener('click', () => {
   const cur = state.flashQueue[state.flashIndex];
   if(!cur) return;
@@ -500,14 +545,12 @@ revealBtn.addEventListener('click', () => {
     revealBtn.textContent = 'Reveal';
   }
 });
-
 markKnown.addEventListener('click', () => {
   state.flashQueue.splice(state.flashIndex,1);
   if(state.flashIndex >= state.flashQueue.length) state.flashIndex = Math.max(0, state.flashQueue.length-1);
   if(!state.flashQueue.length){ alert('Done! All cards in this session completed.'); showMode('list'); renderList(); return; }
   renderFlash();
 });
-
 markAgain.addEventListener('click', () => {
   const cur = state.flashQueue[state.flashIndex];
   state.flashQueue.splice(state.flashIndex,1);
@@ -515,12 +558,11 @@ markAgain.addEventListener('click', () => {
   if(state.flashIndex >= state.flashQueue.length) state.flashIndex = Math.max(0, state.flashQueue.length-1);
   renderFlash();
 });
-
 exitFlash.addEventListener('click', ()=> showMode('list'));
 
-/* =========================
+/* ---------------------
    Quiz
-   ========================= */
+   --------------------- */
 quizBtn.addEventListener('click', () => {
   const source = state.filtered.length ? state.filtered.slice() : getCurrentList().slice();
   if(source.length < 4){ alert('Need at least 4 items to make a multiple-choice quiz.'); return; }
@@ -529,7 +571,6 @@ quizBtn.addEventListener('click', () => {
   showMode('quiz');
   renderQuizQuestion();
 });
-
 function renderQuizQuestion(){
   const rem = state.quiz.remaining;
   if(!rem.length){ alert(`Quiz finished — score ${state.quiz.score}`); showMode('list'); return; }
@@ -554,9 +595,9 @@ function renderQuizQuestion(){
 }
 exitQuiz.addEventListener('click', ()=> showMode('list'));
 
-/* =========================
+/* ---------------------
    Mode switching
-   ========================= */
+   --------------------- */
 function showMode(m){
   state.mode = m;
   document.getElementById('listSection').style.display = m === 'list' ? '' : 'none';
@@ -564,9 +605,9 @@ function showMode(m){
   quizSection.style.display = m === 'quiz' ? '' : 'none';
 }
 
-/* =========================
+/* ---------------------
    Import / Export / Reset
-   ========================= */
+   --------------------- */
 importFile.addEventListener('change', (e)=>{
   const f = e.target.files[0];
   if(!f) return;
@@ -588,7 +629,7 @@ importFile.addEventListener('change', (e)=>{
         freq: Number(r.freq || 0)
       }));
       state.data[state.lang] = normalized;
-      localStorage.setItem(LS_KEYS[state.lang], JSON.stringify(normalized));
+      try { localStorage.setItem(LS_KEYS[state.lang], JSON.stringify(normalized)); } catch(e){}
       alert(`Imported ${normalized.length} entries into ${state.lang}.`);
       renderList();
       importFile.value = '';
@@ -625,15 +666,13 @@ resetBtn.addEventListener('click', () => {
   if(!confirm('Reset current language to sample data? This will overwrite local saved data for this language.')) return;
   const data = state.lang === 'greek' ? SAMPLE_GREEK.slice() : SAMPLE_HEBREW.slice();
   state.data[state.lang] = data;
-  localStorage.setItem(LS_KEYS[state.lang], JSON.stringify(data));
+  try { localStorage.setItem(LS_KEYS[state.lang], JSON.stringify(data)); } catch(e){}
   renderList();
 });
 
-/* =========================
-   Accent & Theme controls (UI)
-   ========================= */
-renderAccentButtons();
-
+/* ---------------------
+   Accent & Theme UI wiring
+   --------------------- */
 applyCustom.addEventListener('click', ()=>{
   const val = (customColor.value || '').trim();
   if(!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(val)){ alert('Enter a valid hex color like #3b7a57'); return; }
@@ -648,16 +687,15 @@ themeButtons.addEventListener('click', (e)=>{
   applyTheme(theme, true);
 });
 
-/* =========================
+/* ---------------------
    Utilities
-   ========================= */
+   --------------------- */
 function debounce(fn, wait=200){
   let t;
   return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); };
 }
 function shuffle(a){ return a.slice().sort(()=>Math.random()-0.5); }
 
-/* CSV parser (simple) */
 function csvToObjects(text){
   const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.trim()!=='');
   if(!lines.length) return [];
@@ -680,21 +718,20 @@ function csvToObjects(text){
   });
 }
 
-/* keyboard shortcuts */
+/* ---------------------
+   Keyboard and accessibility
+   --------------------- */
 document.addEventListener('keydown', e=>{
   if(e.key === 'f' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); flashBtn.click(); }
 });
-
-/* accessibility roles */
 document.querySelectorAll('button').forEach(b=>b.setAttribute('role','button'));
 
-/* initialize UI state */
+/* ---------------------
+   Final init
+   --------------------- */
+tabs.forEach(t => t.addEventListener('click', ()=> setLang(t.dataset.lang)));
 setLang('greek');
 renderList();
-
-/* =========================
-   END
-   ========================= */
 </script>
 </body>
 </html>
